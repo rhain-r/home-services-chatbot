@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Client Concierge Agent</title>
+  <meta name="description" content="ACCRE — an autonomous client concierge that qualifies leads, handles objections, books calls and hands off to humans. Interactive demo." />
+  <meta name="theme-color" content="#0a0d16" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%237c5cf5'/%3E%3Ctext x='32' y='42' font-family='Inter,Arial' font-size='30' font-weight='800' text-anchor='middle' fill='%230a0d16'%3EN%3C/text%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap">
+      <div class="brand">
+        <div class="logo">N</div>
+        <div>ACCRE <small>· Client Concierge</small></div>
+      </div>
+      <nav class="topnav">
+        <a class="icon-btn" href="https://github.com/rhain-r/client-concierge" target="_blank" rel="noopener">GitHub</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero wrap">
+      <div class="pill"><span class="dot"></span> Interactive demo · sample business, no API key needed</div>
+      <h1>Your website has a <em class="grad">Client Concierge</em> closing leads 24/7</h1>
+      <p class="lead">
+        It answers from your own knowledge base, qualifies every visitor one question at a time,
+        handles price and competitor objections, books the call, and hands off to a human when it should.
+        Nothing invented, nothing pushy.
+      </p>
+      <a class="btn" href="#try">Talk to it ↓</a>
+    </section>
+
+    <section class="block">
+      <div class="wrap center">
+        <div class="eyebrow">How it works</div>
+        <h2>Five stages, one question at a time</h2>
+        <p class="lead">Nothing here is a black box. This is the playbook the agent runs, written into its system prompt.</p>
+        <ol class="steps">
+          <li><div class="num">1</div><h3>Triage</h3><p>Buying interest, support, partner, browsing, or hostile? Each gets a different route.</p></li>
+          <li><div class="num">2</div><h3>Discover</h3><p>Finds the problem behind the question and reflects it back in the visitor's words.</p></li>
+          <li><div class="num">3</div><h3>Qualify</h3><p>Need, authority, timeline, then budget last, framed as a service rather than a gate.</p></li>
+          <li><div class="num">4</div><h3>Handle objections</h3><p>Price resistance and competitor comparisons follow set frameworks. No invented discounts.</p></li>
+          <li><div class="num">5</div><h3>Convert or hand off</h3><p>Books the call, captures the lead with consent, or escalates to a human.</p></li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="block" id="try">
+      <div class="wrap">
+        <div class="center">
+          <div class="eyebrow">Try it yourself</div>
+          <h2>Talk to the concierge, watch the agent work</h2>
+          <p class="lead">Left: what the visitor sees. Right: what the business sees. This demo uses a fictional company and sample data, so click around freely; nothing is sent anywhere.</p>
+        </div>
+
+        <div class="grid">
+          <div class="chat card">
+            <div class="chat-head">
+              <div class="avatar" id="agent-avatar">N</div>
+              <div class="who"><b id="agent-name">Nova</b><span id="agent-sub">Northwind Automation</span></div>
+              <div class="status" id="status"><span class="dot"></span><span id="status-text">Online</span></div>
+            </div>
+            <div class="messages" id="messages" aria-live="polite"></div>
+            <div class="chips" id="chips"></div>
+            <form class="composer" id="composer">
+              <textarea id="input" rows="1" placeholder="Ask about services, pricing, or just say hi…" aria-label="Message"></textarea>
+              <button type="submit" class="btn" id="send">Send</button>
+              <button type="button" class="btn secondary hidden" id="stop">Stop</button>
+            </form>
+            <div class="chat-foot">
+              <label><input type="checkbox" id="show-actions" checked /> Show agent actions in chat</label>
+              <button type="button" class="linkish" id="reset">Reset conversation</button>
+            </div>
+          </div>
+
+          <aside class="console">
+            <div class="card">
+              <div class="card-head"><span>Lead temperature</span><span id="temp-label">—</span></div>
+              <div class="card-body">
+                <div class="temp" id="temp">
+                  <span class="cold">Cold</span><span class="warm">Warm</span><span class="hot">Hot</span><span class="disqualified">Not a fit</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-head"><span>Qualification notes</span><span>N · A · T · B</span></div>
+              <div class="card-body">
+                <dl class="kv" id="profile">
+                  <dt>Need</dt><dd class="empty" data-k="need">not yet known</dd>
+                  <dt>Authority</dt><dd class="empty" data-k="role">not yet known</dd>
+                  <dt>Timeline</dt><dd class="empty" data-k="timeline">not yet known</dd>
+                  <dt>Budget</dt><dd class="empty" data-k="budget_range">not yet known</dd>
+                  <dt>Company</dt><dd class="empty" data-k="company">—</dd>
+                  <dt>Objection</dt><dd class="empty" data-k="objection">—</dd>
+                  <dt>Notes</dt><dd class="empty" data-k="notes">—</dd>
+                </dl>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-head"><span>Agent actions</span><span id="action-count">0</span></div>
+              <div class="card-body">
+                <ul class="log" id="log"></ul>
+                <p class="empty-note" id="log-empty">Tool calls appear here with their exact JSON input and result.</p>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-head"><span>Inbox</span><span>what the business receives</span></div>
+              <div class="card-body">
+                <ul class="inbox" id="inbox"></ul>
+                <p class="empty-note" id="inbox-empty">Captured leads, booking requests and human handoffs land here (or in your CRM via webhook).</p>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <section class="block">
+      <div class="wrap">
+        <div class="center">
+          <div class="eyebrow">Under the hood</div>
+          <h2>Four files do the work</h2>
+          <p class="lead">Swap the business config and the knowledge base, and the same agent sells something else.</p>
+        </div>
+        <div class="hood">
+          <div class="card">
+            <h3>System prompt</h3>
+            <p><code>prompts/ACCRE_SYSTEM_PROMPT.md</code> — persona, adaptive register, triage, qualification framework, objection playbooks, guardrails, tool protocol. Placeholders filled at runtime.</p>
+          </div>
+          <div class="card">
+            <h3>Knowledge base</h3>
+            <p><code>agent/knowledge-base.md</code> — the only source of facts the agent may state. If it is not in here, the agent says it does not know and offers a human.</p>
+          </div>
+          <div class="card">
+            <h3>Tools</h3>
+            <p><code>agent/tools.js</code> — <code>update_lead_profile</code>, <code>capture_lead</code>, <code>trigger_calendar</code>, <code>escalate_to_human</code>. Validated before they run; delivered to your CRM by webhook.</p>
+          </div>
+          <div class="card">
+            <h3>Runtime</h3>
+            <p><code>agent/accre-agent.js</code> — streaming tool loop on the official Anthropic SDK with prompt caching and adaptive thinking. Runs in the terminal (<code>npm run chat</code>) or behind your own server.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      Autonomous Client Concierge &amp; Revenue Engine — demo built on a fictional business with sample data; no real leads are sent anywhere.
+      <br /><a href="https://github.com/rhain-r/client-concierge" target="_blank" rel="noopener">View the source on GitHub</a>
+    </div>
+  </footer>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

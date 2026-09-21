@@ -1,0 +1,19 @@
+{
+  "name": "client-concierge",
+  "version": "1.0.0",
+  "description": "ACCRE — Autonomous Client Concierge & Revenue Engine. A production-grade AI sales concierge: system prompt, tool-calling runtime on the Anthropic Claude API, and a static GitHub Pages demo.",
+  "license": "MIT",
+  "type": "module",
+  "private": true,
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "npx --yes serve . -l 8080",
+    "test": "node --test \"tests/**/*.test.mjs\"",
+    "chat": "node --env-file-if-exists=.env agent/cli.mjs"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.127.0"
+  }
+}
