@@ -1,5 +1,5 @@
 {
-  "name": "client-concierge",
+  "name": "home-services-chatbot",
   "version": "1.0.0",
   "description": "ACCRE — Autonomous Client Concierge & Revenue Engine. A production-grade AI sales concierge: system prompt, tool-calling runtime on the Anthropic Claude API, and a static GitHub Pages demo.",
   "license": "MIT",

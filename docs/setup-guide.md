@@ -13,7 +13,7 @@ Open <http://localhost:8080/agent/>.
 
 ## 2. Publish on GitHub Pages
 
-1. Create a new repository on GitHub (for example `client-concierge`).
+1. Create a new repository on GitHub (for example `home-services-chatbot`).
 2. Push this folder:
 
    ```bash
@@ -21,13 +21,13 @@ Open <http://localhost:8080/agent/>.
    git add .
    git commit -m "ACCRE client concierge"
    git branch -M main
-   git remote add origin https://github.com/<you>/client-concierge.git
+   git remote add origin https://github.com/<you>/home-services-chatbot.git
    git push -u origin main
    ```
 
 3. On GitHub: **Settings → Pages → Build and deployment → Source: Deploy from a branch → Branch: `main` / `/ (root)` → Save**.
 4. Wait about a minute. Your demo is live at
-   `https://<you>.github.io/client-concierge/agent/`
+   `https://<you>.github.io/home-services-chatbot/agent/`
    (the repository root redirects there too).
 
 Every later `git push` to `main` redeploys automatically. No build step, no secrets in the repo.

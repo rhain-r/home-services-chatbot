@@ -1,6 +1,6 @@
 # Autonomous Client Concierge & Revenue Engine (ACCRE)
 
-[![Tests](https://github.com/rhain-r/client-concierge/actions/workflows/test.yml/badge.svg)](https://github.com/rhain-r/client-concierge/actions/workflows/test.yml)
+[![Tests](https://github.com/rhain-r/home-services-chatbot/actions/workflows/test.yml/badge.svg)](https://github.com/rhain-r/home-services-chatbot/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-a78bfa.svg)](LICENSE)
 
 An AI concierge that sits on a business website and behaves like its best account manager: it answers only from the company's knowledge base, qualifies every visitor one question at a time, handles price and competitor objections with set playbooks, books the call, captures the lead with consent, and hands off to a human when it should.
@@ -9,7 +9,7 @@ It is a universal agent. Swap two files (`business-config.js` and `knowledge-bas
 
 ## Try it out!
 
-| Live → | https://rhain-r.github.io/client-concierge/agent/ |
+| Live → | https://rhain-r.github.io/home-services-chatbot/agent/ |
 |---|---|
 
 The demo is the website of **Summit Heating, Air & Roofing**, a fictional Denver contractor, with the concierge (Riley) as the chat bubble in the corner — exactly what a client would get. The customer sees only what a customer should: the conversation, quick replies, and plain cards (pick an arrival window, booked, sent to the office, dispatcher notified). It needs no API key: a scripted engine walks the same stages and fires the same tools as the Claude-powered runtime. Nothing you type is sent anywhere.
@@ -130,12 +130,12 @@ package.json
    git add .
    git commit -m "ACCRE client concierge"
    git branch -M main
-   git remote add origin https://github.com/<you>/client-concierge.git
+   git remote add origin https://github.com/<you>/home-services-chatbot.git
    git push -u origin main
    ```
 
 2. **Settings → Pages → Source: Deploy from a branch → `main` / `/ (root)` → Save.**
-3. About a minute later the demo is live at `https://<you>.github.io/client-concierge/agent/`. Every push to `main` redeploys.
+3. About a minute later the demo is live at `https://<you>.github.io/home-services-chatbot/agent/`. Every push to `main` redeploys.
 
 If you fork under a different name, update the two GitHub links in `agent/index.html` and the badge at the top of this file.
 
