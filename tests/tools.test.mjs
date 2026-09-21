@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { TOOLS, TOOL_NAMES, validateToolInput, createToolExecutor, bookingLinkFor } from "../agent/tools.js";
+import { TOOLS, TOOL_NAMES, validateToolInput, createToolExecutor, bookingLinkFor, availableWindows } from "../agent/tools.js";
 import { business } from "../agent/business-config.js";
 
 test("tool definitions are well-formed for the Messages API", () => {
@@ -50,6 +50,23 @@ test("update_lead_profile needs at least one fact", () => {
   assert.equal(validateToolInput("update_lead_profile", { need: "x" }).ok, true);
 });
 
+test("trigger_calendar needs at least one contact", () => {
+  const base = { meeting_type: "Service call", prospect_name: "Sam", purpose: "p" };
+  assert.equal(validateToolInput("trigger_calendar", base).ok, false);
+  assert.equal(validateToolInput("trigger_calendar", { ...base, phone: "303-555-0100" }).ok, true);
+  assert.equal(validateToolInput("trigger_calendar", { ...base, email: "s@x.io" }).ok, true);
+  assert.equal(validateToolInput("trigger_calendar", { ...base, email: "nope" }).ok, false);
+});
+
+test("availableWindows stays inside business hours and skips Sundays", () => {
+  const sat = availableWindows(new Date("2026-09-26T16:00:00"));
+  assert.ok(sat.every((w) => new Date(w.start).getDay() !== 0), "no Sunday windows");
+  assert.ok(sat.every((w) => { const h = new Date(w.start).getHours(); return h >= 7 && h <= 17; }));
+  const midday = availableWindows(new Date("2026-09-21T09:30:00"));
+  assert.match(midday[0].label, /^Today /);
+  assert.equal(new Set(midday.map((w) => w.id)).size, midday.length, "ids are unique");
+});
+
 test("bookingLinkFor prefills name and email", () => {
   const url = new URL(bookingLinkFor("https://cal.com/acme/intro", { name: "Sam R", email: "s@x.io" }));
   assert.equal(url.searchParams.get("name"), "Sam R");
@@ -79,10 +96,27 @@ test("executor: local inbox path fires hooks and returns structured results", as
   assert.match(lead.lead_id, /^lead_/);
   assert.equal(seen.lead.profile_snapshot.need, "missed calls", "lead carries the profile snapshot");
 
-  const cal = await execute("trigger_calendar", { meeting_type: "Service call", prospect_name: "Sam", email: "sam@x.io", purpose: "p" });
+  // Step 1: offer windows; nothing is booked yet.
+  const cal = await execute("trigger_calendar", { meeting_type: "Service call", prospect_name: "Sam", phone: "(303) 555-0192", purpose: "p" });
   assert.equal(cal.ok, true);
-  assert.ok(cal.booking_url.startsWith(business.bookingUrl));
-  assert.ok(cal.instructions.includes("Do not say the meeting is confirmed"));
+  assert.equal(cal.confirmed, false);
+  assert.ok(cal.available_windows.length >= 3, "offers arrival windows");
+  assert.ok(cal.available_windows.every((w) => w.id && w.label && w.start));
+  assert.ok(cal.booking_url.startsWith(business.bookingUrl), "keeps a booking link as fallback");
+  assert.equal(seen.booking.status, "offered");
+
+  // Step 2: the visitor picks a window -> confirmed.
+  const pick = cal.available_windows[1];
+  const done = await execute("trigger_calendar", { meeting_type: "Service call", prospect_name: "Sam", phone: "(303) 555-0192", purpose: "p", selected_window: pick.id });
+  assert.equal(done.confirmed, true);
+  assert.equal(done.window.label, pick.label);
+  assert.deepEqual(done.confirmation_sent_to, ["(303) 555-0192"]);
+  assert.match(done.booking_id, /^book_/);
+  assert.equal(seen.booking.status, "confirmed");
+
+  const stale = await execute("trigger_calendar", { meeting_type: "Service call", prospect_name: "Sam", phone: "(303) 555-0192", purpose: "p", selected_window: "w1-1-7" });
+  assert.equal(stale.ok, false, "an unknown window is rejected with a fresh list");
+  assert.ok(stale.available_windows.length > 0);
 
   const h = await execute("escalate_to_human", { reason: "support", summary: "s", urgency: "high" });
   assert.equal(h.ok, true);

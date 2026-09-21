@@ -79,22 +79,23 @@ export const TOOLS = [
   {
     name: "trigger_calendar",
     description:
-      "Open the booking flow so the visitor can pick a meeting slot. Only after they agreed to book. Never for disqualified leads. The result contains the booking link to present; do not claim the meeting is confirmed.",
+      "Book an appointment in two steps. Step 1: call without selected_window once the visitor agrees to book and you have their details; the result lists available_windows (and a booking_url fallback). Present the windows. Step 2: when the visitor picks one, call again with the same details plus selected_window; only a result with confirmed:true means it is booked. Never for disqualified leads.",
     eager_input_streaming: true,
     input_schema: {
       type: "object",
       properties: {
         meeting_type: str("Meeting type name exactly as listed in the knowledge base, e.g. 'Service call' or 'Free estimate'."),
         prospect_name: str("Visitor's name."),
-        email: str("Visitor's email address."),
-        phone: str("Visitor's phone number, if the knowledge base requires it for booking or they offered it."),
+        email: str("Visitor's email address, if given. At least one of email or phone is required."),
+        phone: str("Visitor's phone number, if given. At least one of email or phone is required; follow the knowledge base on which the business needs."),
         company: str("Company name, if shared."),
         location: str("City, ZIP or address, if the knowledge base requires it for booking."),
         purpose: str("One line the human will read before the call: who they are and what they want."),
         preferred_times: str("Any stated preference, e.g. 'mornings next week'."),
         timezone: str("Visitor's timezone if stated, e.g. 'America/Chicago' or 'UK time'."),
+        selected_window: str("Step 2 only: the id of the window the visitor chose, exactly as returned in available_windows."),
       },
-      required: ["meeting_type", "prospect_name", "email", "purpose"],
+      required: ["meeting_type", "prospect_name", "purpose"],
       additionalProperties: false,
     },
   },
@@ -172,8 +173,11 @@ export function validateToolInput(name, input) {
       errors.push("email does not look valid; ask the visitor to check it");
     }
   }
-  if (name === "trigger_calendar" && typeof input.email === "string" && !EMAIL_RE.test(input.email.trim())) {
-    errors.push("email does not look valid; ask the visitor to check it");
+  if (name === "trigger_calendar") {
+    if (typeof input.email === "string" && input.email && !EMAIL_RE.test(input.email.trim())) {
+      errors.push("email does not look valid; ask the visitor to check it");
+    }
+    if (!input.email && !input.phone) errors.push("provide at least one contact: email or phone");
   }
   if (name === "update_lead_profile") {
     const meaningful = Object.keys(input).filter((k) => k !== "temperature" && input[k]);
@@ -200,6 +204,38 @@ async function postJson(url, payload, secret) {
   return res;
 }
 
+/**
+ * Next arrival windows (2-hour slots inside Mon-Sat 07:00-19:00), starting a
+ * few hours from now. In production this comes from the real calendar; the
+ * shape { id, label, start } is what the model and the UI rely on.
+ */
+export function availableWindows(now = new Date(), count = 4) {
+  const out = [];
+  const t = new Date(now);
+  t.setMinutes(0, 0, 0);
+  t.setHours(t.getHours() + 3);                 // earliest start: about three hours out
+  if (t.getHours() % 2 === 0) t.setHours(t.getHours() + 1); // windows start on odd hours: 7, 9, ... 17
+  const tomorrow = new Date(now); tomorrow.setDate(now.getDate() + 1);
+  const fmt = (d) => d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }).replace(":00", "");
+  while (out.length < count) {
+    const day = t.getDay(), hour = t.getHours();
+    if (day === 0 || hour > 17) { t.setDate(t.getDate() + 1); t.setHours(7, 0, 0, 0); continue; }
+    if (hour < 7) { t.setHours(7, 0, 0, 0); continue; }
+    const start = new Date(t);
+    const end = new Date(t); end.setHours(end.getHours() + 2);
+    const dayLabel = start.toDateString() === now.toDateString() ? "Today"
+      : start.toDateString() === tomorrow.toDateString() ? "Tomorrow"
+      : start.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+    out.push({
+      id: `w${start.getMonth() + 1}-${start.getDate()}-${start.getHours()}`,
+      label: `${dayLabel} ${fmt(start)}–${fmt(end)}`,
+      start: start.toISOString(),
+    });
+    t.setHours(t.getHours() + 2);
+  }
+  return out;
+}
+
 /** Append prefill params to a Cal.com / Calendly style booking URL. */
 export function bookingLinkFor(baseUrl, { name, email }) {
   try {
@@ -221,8 +257,9 @@ export function bookingLinkFor(baseUrl, { name, email }) {
  * @param {object} [options.hooks]          - UI callbacks: onProfileUpdate(profile), onLeadCaptured(lead), onHandoff(ticket)
  * @returns {(name: string, input: object) => Promise<object>} execute
  */
-export function createToolExecutor({ business, integrations = {}, hooks = {} }) {
+export function createToolExecutor({ business, integrations = {}, hooks = {}, clock = () => new Date() }) {
   const profile = {};
+  const windowsNow = () => availableWindows(clock());
 
   const handlers = {
     async update_lead_profile(input) {
@@ -259,14 +296,36 @@ export function createToolExecutor({ business, integrations = {}, hooks = {} }) 
         name: input.prospect_name,
         email: input.email,
       });
-      const booking = { booking_id: newId("book"), requested_at: new Date().toISOString(), ...input, booking_url };
-      hooks.onCalendar?.(booking);
+
+      // Step 2: the visitor chose a window -> confirm it.
+      if (input.selected_window) {
+        const window = windowsNow().find((w) => w.id === input.selected_window);
+        if (!window) {
+          return { ok: false, error: "That window is no longer available; offer the current available_windows again.", available_windows: windowsNow() };
+        }
+        const booking = { booking_id: newId("book"), confirmed_at: new Date().toISOString(), status: "confirmed", ...input, window, booking_url };
+        hooks.onCalendar?.(booking);
+        return {
+          ok: true,
+          confirmed: true,
+          booking_id: booking.booking_id,
+          meeting_type: input.meeting_type,
+          window,
+          confirmation_sent_to: [input.phone, input.email].filter(Boolean),
+          instructions: "Booked. Tell the visitor the window and where the confirmation went. The technician texts 30 minutes before arrival.",
+        };
+      }
+
+      // Step 1: offer windows.
+      const windows = windowsNow();
+      hooks.onCalendar?.({ booking_id: null, status: "offered", requested_at: new Date().toISOString(), ...input, booking_url, windows });
       return {
         ok: true,
-        booking_url,
+        confirmed: false,
         meeting_type: input.meeting_type,
-        instructions:
-          "Present booking_url to the visitor. Availability is shown on the calendar itself. Do not say the meeting is confirmed.",
+        available_windows: windows,
+        booking_url,
+        instructions: "Present available_windows as choices (label only). When the visitor picks one, call trigger_calendar again with selected_window set to its id. Do not say it is booked until then.",
       };
     },
 

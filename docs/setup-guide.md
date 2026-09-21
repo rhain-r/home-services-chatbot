@@ -75,4 +75,4 @@ Payload shapes are documented in `docs/tool-definitions.md`. If a webhook fails,
 npm test
 ```
 
-`node --test` runs 27 checks in under a second: prompt assembly, tool schema validity, input validation and business rules, webhook delivery/failure, and the full demo conversation flows. The included GitHub Actions workflow runs the same suite on every push.
+`node --test` runs 31 checks in under a second: prompt assembly, tool schema validity, input validation and business rules, webhook delivery/failure, and the full demo conversation flows. The included GitHub Actions workflow runs the same suite on every push.

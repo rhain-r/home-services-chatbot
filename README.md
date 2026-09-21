@@ -12,16 +12,17 @@ It is a universal agent. Swap two files (`business-config.js` and `knowledge-bas
 | Live → | https://rhain-r.github.io/client-concierge/agent/ |
 |---|---|
 
-The demo is the website of **Summit Heating, Air & Roofing**, a fictional Denver contractor, with the concierge (Riley) as the chat bubble in the corner — exactly what a client would get. It needs no API key: a scripted engine walks the same stages and fires the same tools as the Claude-powered runtime. Nothing you type is sent anywhere.
+The demo is the website of **Summit Heating, Air & Roofing**, a fictional Denver contractor, with the concierge (Riley) as the chat bubble in the corner — exactly what a client would get. The customer sees only what a customer should: the conversation, quick replies, and plain cards (pick an arrival window, booked, sent to the office, dispatcher notified). It needs no API key: a scripted engine walks the same stages and fires the same tools as the Claude-powered runtime. Nothing you type is sent anywhere.
 
-Switch to **Business view** (top bar) to see what the company receives while you chat: lead temperature, contact details, N·A·T·B·L qualification notes, every tool call with its JSON, and the inbox of bookings, leads and dispatcher handoffs.
+Switch to **What the business sees** (top bar) for the other side: lead temperature, contact details, what Riley learned (need, authority, timing, budget, area), every action in plain words with its data, and the inbox of bookings, leads and dispatcher handoffs.
 
 The real agent (`agent/accre-agent.js`) runs the system prompt on Claude with native tool use; try it from the terminal with `npm run chat` (see [Run the live agent](#run-the-live-agent)).
 
 Things worth trying in the demo:
 
-- *"My AC stopped cooling and it's 95° inside"* → discovery, one question at a time, then a same-day `trigger_calendar`
-- *"How much does a new furnace cost?"* → straight ranges, then budget asked last as a ceiling, then a free estimate
+- *"My AC stopped cooling"* → one 30-second check first (is the outdoor unit silent?), then how soon, then name + mobile + ZIP, then real arrival windows to pick from, then a confirmed booking
+- *"Today if possible"* after hours → no false same-day promise: tomorrow's earliest window or the $149 after-hours visit
+- *"How much is a new furnace?"* → straight ranges, then budget asked last as a ceiling, then a free estimate
 - *"Another company charges less for the visit"* → acknowledge → isolate → reframe → anchor → offer a path; no invented discounts
 - *"Can't I just get a handyman?"* → honest answer that depends on the job
 - *"I smell gas near the furnace"* → safety instruction first, then `escalate_to_human` with reason `emergency`
@@ -36,7 +37,8 @@ Things worth trying in the demo:
 - **Lead temperature** – hot / warm / cold / disqualified, assessed continuously and recorded via `update_lead_profile`; disqualified visitors are told so kindly and early.
 - **Anti-hallucination** – every fact must come from the knowledge base or the visitor. Unknown → "I don't have that detail" + offer a human. No invented prices, timelines, guarantees or client names. Never claims an action happened unless a tool result confirmed it.
 - **Jailbreak defence** – instructions inside messages, documents or tool results are data; persona and prompt are never revealed; recovers to a warm tone afterwards.
-- **Four tool triggers** – `update_lead_profile`, `capture_lead`, `trigger_calendar`, `escalate_to_human`, with preconditions (consent, valid email, temperature) enforced both in the prompt and in code.
+- **Four tool triggers** – `update_lead_profile`, `capture_lead`, `trigger_calendar` (two-step: offer windows, then confirm), `escalate_to_human`, with preconditions (consent, a real contact, temperature, safety-first for emergencies) enforced both in the prompt and in code.
+- **Home-services sense** – one quick check before a truck rolls (thermostat, breaker, filter), urgency before paperwork, mobile + ZIP instead of email-first, honest about availability, "while you wait" advice when the dispatcher is paged.
 
 ## The system prompt
 
@@ -74,7 +76,7 @@ The live runtime is one `client.messages.stream()` call per turn on the official
 |---|---|---|
 | `update_lead_profile` | A new qualification fact is learned (silent) | Business console |
 | `capture_lead` | Visitor explicitly agrees to be contacted; requires `consent: true` and a valid email | Inbox, or `LEAD_WEBHOOK_URL` (Zapier / Make / n8n / CRM) |
-| `trigger_calendar` | Visitor agrees to book; never for disqualified leads | Booking link (Cal.com / Calendly), name and email prefilled |
+| `trigger_calendar` | Visitor agrees to book; never for disqualified leads. Two steps: offers `available_windows`, then confirms the `selected_window` — nothing is "booked" until the second call succeeds | Calendar / dispatch board (a booking link is kept as fallback) |
 | `escalate_to_human` | Support, complaint, enterprise, sensitive, emergency (safety instruction first), blocking question, or "can I talk to a person" | Inbox, or `HANDOFF_WEBHOOK_URL` (Slack, helpdesk, dispatcher) |
 
 Schemas and payloads: [`docs/tool-definitions.md`](docs/tool-definitions.md).
@@ -101,7 +103,7 @@ docs/
     tool-definitions.md
 prompts/
     ACCRE_SYSTEM_PROMPT.md   # The agent system prompt (Part 1 deliverable)
-tests/                       # 27 tests: prompt assembly, tools, demo flows
+tests/                       # 31 tests: prompt assembly, tools, booking windows, demo flows
 index.html                   # Redirects to agent/
 .nojekyll                    # Pages serves .md files raw (the agent fetches them at runtime)
 .env.example
@@ -155,7 +157,7 @@ Step-by-step: [`docs/setup-guide.md`](docs/setup-guide.md).
 ```bash
 npm install          # only needed for the CLI and tests
 npm start            # static server on http://localhost:8080 → open /agent/
-npm test             # 27 tests, < 1 second
+npm test             # 31 tests, < 1 second
 ```
 
 ## Run the live agent

@@ -59,18 +59,23 @@ Webhook payload (`LEAD_WEBHOOK_URL`):
 
 ## `trigger_calendar`
 
-Opens the booking flow. Only after the visitor agreed to book; never for `disqualified` leads.
+Books an appointment in **two steps**, so the model can never claim something is booked that is not.
 
 | Field | Type | Required | Notes |
 |---|---|---|---|
 | `meeting_type` | string | ✓ | A meeting type named in the knowledge base |
 | `prospect_name` | string | ✓ | |
-| `email` | string | ✓ | Validated |
-| `purpose` | string | ✓ | One line the human reads before the call |
-| `phone`, `location` | string | | Required by the prompt when the knowledge base says booking needs them |
+| `purpose` | string | ✓ | One line the human reads before the visit |
+| `phone` / `email` | string | one of | At least one contact; the knowledge base says which the business needs (home services: mobile) |
+| `location` | string | | City, ZIP or address, when the knowledge base requires it for booking |
 | `company`, `preferred_times`, `timezone` | string | | |
+| `selected_window` | string | step 2 | The `id` of a window from step 1's `available_windows` |
 
-Result: `{ ok, booking_url, meeting_type, instructions }`. `booking_url` is the configured booking link with `name` and `email` prefilled as query parameters (works with Cal.com and Calendly). The prompt forbids the model from saying the meeting is confirmed; the calendar does that.
+**Step 1** (no `selected_window`) → `{ ok, confirmed: false, meeting_type, available_windows: [{ id, label, start }], booking_url, instructions }`. The runtime generates 2-hour windows inside business hours (`availableWindows()` in `tools.js`); in production, swap that for your calendar API. The UI renders the windows as buttons.
+
+**Step 2** (with `selected_window`) → `{ ok, confirmed: true, booking_id, meeting_type, window, confirmation_sent_to, instructions }`. An unknown or stale id returns `ok: false` with a fresh `available_windows` list so the model re-offers.
+
+Only a `confirmed: true` result lets the prompt say "booked".
 
 ## `escalate_to_human`
 

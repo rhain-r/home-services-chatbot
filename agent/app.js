@@ -1,11 +1,15 @@
 /**
  * UI controller for the demo page: the client's website, the concierge chat
- * widget, and the "Business view" drawer.
+ * widget (what the customer sees) and the "What the business sees" drawer.
  *
  * The concierge is agent/demo-engine.js: a scripted agent that walks the same
  * stages and fires the same tools as the Claude-powered runtime
  * (agent/accre-agent.js) with no API key and no network. This file only
  * renders; it never decides what the agent says.
+ *
+ * Customer view shows only what a real customer would see: messages, quick
+ * replies, and plain cards (pick a window, booked, sent, dispatcher notified).
+ * Tool names, JSON and lead notes live in the business drawer only.
  */
 
 import { business } from "./business-config.js";
@@ -13,66 +17,62 @@ import { createDemoAgent } from "./demo-engine.js";
 
 const $ = (sel) => document.querySelector(sel);
 const els = {
-  // widget
-  widget: $("#widget"), launcher: $("#launcher"), unread: $("#unread"), teaser: $("#teaser"), teaserClose: $("#teaser-close"),
-  panel: $("#panel"), panelMin: $("#panel-min"),
+  launcher: $("#launcher"), unread: $("#unread"), teaser: $("#teaser"), teaserClose: $("#teaser-close"),
+  panel: $("#panel"), panelMin: $("#panel-min"), reset: $("#reset"),
   messages: $("#messages"), chips: $("#chips"), composer: $("#composer"), input: $("#input"), send: $("#send"), stop: $("#stop"),
-  reset: $("#reset"), showActions: $("#show-actions"), status: $("#status"), statusText: $("#status-text"),
-  // drawer
+  agentSub: $("#agent-sub"),
   drawer: $("#drawer"), drawerClose: $("#drawer-close"), viewVisitor: $("#view-visitor"), viewBusiness: $("#view-business"),
   temp: $("#temp"), tempLabel: $("#temp-label"), profile: $("#profile"), contact: $("#contact"),
   log: $("#log"), logEmpty: $("#log-empty"), actionCount: $("#action-count"), inbox: $("#inbox"), inboxEmpty: $("#inbox-empty"),
-  // about
+  restartDemo: $("#restart-demo"),
   about: $("#about"), openAbout: $("#open-about"), aboutClose: $("#about-close"),
 };
 
-// ─── Persistence (per-browser conveniences only) ─────────────────────────────
 const store = {
-  get(k, fallback = "") {
-    try { return localStorage.getItem(`accre.${k}`) ?? fallback; } catch { return fallback; }
-  },
-  set(k, v) {
-    try { v ? localStorage.setItem(`accre.${k}`, v) : localStorage.removeItem(`accre.${k}`); } catch { /* private mode */ }
-  },
+  get(k, fallback = "") { try { return localStorage.getItem(`accre.${k}`) ?? fallback; } catch { return fallback; } },
+  set(k, v) { try { v ? localStorage.setItem(`accre.${k}`, v) : localStorage.removeItem(`accre.${k}`); } catch { /* private mode */ } },
 };
 
 // ─── State ───────────────────────────────────────────────────────────────────
 let agent = null;
 let controller = null;
-let current = null;    // the assistant message being streamed
+let current = null;
 let actionCount = 0;
 let autoScroll = true;
 let unread = 0;
 const contact = {};
 
-// ─── Rendering helpers ───────────────────────────────────────────────────────
-const escapeHtml = (s) =>
-  String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+const escapeHtml = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
 /** Minimal, safe markdown: paragraphs, bullets, **bold**, links. */
 function md(text) {
-  const inline = (s) =>
-    escapeHtml(s)
-      .replace(/\*\*(.+?)\*\*/g, "<b>$1</b>")
-      .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
-      .replace(/(^|[\s(])((https?:\/\/)[^\s<)]+)/g, '$1<a href="$2" target="_blank" rel="noopener">$2</a>');
+  const inline = (s) => escapeHtml(s)
+    .replace(/\*\*(.+?)\*\*/g, "<b>$1</b>")
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
+    .replace(/(^|[\s(])((https?:\/\/)[^\s<)]+)/g, '$1<a href="$2" target="_blank" rel="noopener">$2</a>');
   return text.trim().split(/\n{2,}/).map((block) => {
     const lines = block.split("\n");
-    if (lines.every((l) => /^\s*[-•*]\s+/.test(l))) {
-      return `<ul>${lines.map((l) => `<li>${inline(l.replace(/^\s*[-•*]\s+/, ""))}</li>`).join("")}</ul>`;
-    }
+    if (lines.every((l) => /^\s*[-•*]\s+/.test(l))) return `<ul>${lines.map((l) => `<li>${inline(l.replace(/^\s*[-•*]\s+/, ""))}</li>`).join("")}</ul>`;
     return `<p>${lines.map(inline).join("<br>")}</p>`;
   }).join("");
 }
 
-function scrollToBottom(force = false) {
-  if (autoScroll || force) els.messages.scrollTop = els.messages.scrollHeight;
-}
+const ICONS = {
+  calendar: '<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3" stroke="currentColor" stroke-width="1.8" fill="none"/><path d="M3 10h18M8 3v4m8-4v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+  check: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8" fill="none"/><path d="m8 12 3 3 5-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>',
+  send: '<svg viewBox="0 0 24 24"><path d="M3 11.5 21 3l-8.5 18-2-7.5z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" fill="none"/></svg>',
+  phone: '<svg viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" fill="none"/></svg>',
+  alert: '<svg viewBox="0 0 24 24"><path d="M12 3 2 20h20z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" fill="none"/><path d="M12 10v4m0 3v.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+};
+
+function scrollToBottom(force = false) { if (autoScroll || force) els.messages.scrollTop = els.messages.scrollHeight; }
 els.messages.addEventListener("scroll", () => {
   const { scrollTop, scrollHeight, clientHeight } = els.messages;
   autoScroll = scrollHeight - scrollTop - clientHeight < 60;
 });
 
+// ─── Messages ────────────────────────────────────────────────────────────────
 function addMessage(role, html = "") {
   const el = document.createElement("div");
   el.className = `msg ${role}`;
@@ -99,11 +99,7 @@ function startAssistantMessage() {
 function appendText(delta) {
   if (!current) startAssistantMessage();
   if (current.typing) { current.typing.remove(); current.typing = null; }
-  if (!current.textEl) {
-    current.textEl = document.createElement("div");
-    current.text = "";
-    current.bubble.appendChild(current.textEl);
-  }
+  if (!current.textEl) { current.textEl = document.createElement("div"); current.text = ""; current.bubble.appendChild(current.textEl); }
   current.text += delta;
   current.textEl.innerHTML = md(current.text);
   scrollToBottom();
@@ -117,32 +113,15 @@ function finishAssistantMessage() {
   current = null;
 }
 
-// ─── Action cards (inside the chat) ──────────────────────────────────────────
-const CARD_TITLES = {
-  trigger_calendar: ["calendar", "Opening the booking calendar"],
-  capture_lead: ["lead", "Sending your details to the office"],
-  escalate_to_human: ["handoff", "Reaching the on-call team"],
-};
-
+// ─── Cards in the chat (customer-facing, plain language) ─────────────────────
 function addToolCard(evt) {
+  if (evt.name === "update_lead_profile") return; // internal notes never appear in the customer view
   if (!current) startAssistantMessage();
   if (current.typing) { current.typing.remove(); current.typing = null; }
-  current.textEl = null; // text after this card starts a new part
-
-  if (evt.name === "update_lead_profile") {
-    const note = document.createElement("div");
-    note.className = "action-note";
-    const keys = Object.keys(evt.input).filter((k) => k !== "temperature");
-    note.textContent = `↳ noted: ${keys.join(", ") || "temperature"}${evt.input.temperature ? ` · ${evt.input.temperature}` : ""}`;
-    current.bubble.appendChild(note);
-    current.cards.set(evt.id, note);
-    scrollToBottom();
-    return;
-  }
-  const [kind, title] = CARD_TITLES[evt.name] ?? ["generic", evt.name];
+  current.textEl = null; // any text after this card starts a new part
   const card = document.createElement("div");
-  card.className = `action ${kind}`;
-  card.innerHTML = `<div class="title"><span class="tag">${escapeHtml(evt.name)}</span>${escapeHtml(title)}…</div>`;
+  card.className = "action";
+  card.innerHTML = `<div class="title">${ICONS.calendar}<span>One moment…</span></div>`;
   current.bubble.appendChild(card);
   current.cards.set(evt.id, card);
   scrollToBottom();
@@ -150,29 +129,45 @@ function addToolCard(evt) {
 
 function completeToolCard(evt) {
   const card = current?.cards.get(evt.id);
-  if (!card || card.classList.contains("action-note")) return;
+  if (!card) return;
   const r = evt.result ?? {};
-  const tag = `<span class="tag">${escapeHtml(evt.name)}</span>`;
   if (evt.isError) {
-    card.classList.add("error");
-    card.innerHTML = `<div class="title">${tag}Action failed</div><div class="meta">${escapeHtml(r.error ?? "unknown error")}${r.details ? " — " + escapeHtml(r.details.join("; ")) : ""}</div>`;
+    card.className = "action error";
+    card.innerHTML = `<div class="title">${ICONS.alert}<span>That didn't go through</span></div><div class="meta">${escapeHtml(r.error ?? "Please try again, or call " + business.phone + ".")}</div>`;
     return;
   }
-  if (evt.name === "trigger_calendar") {
-    card.innerHTML = `<div class="title">${tag}Booking calendar ready</div>
-      <div class="meta">${escapeHtml(r.meeting_type)} · pick any slot that suits you</div>
-      <a class="btn btn-primary" href="${escapeHtml(r.booking_url)}" target="_blank" rel="noopener">Open booking calendar ↗</a>`;
+  if (evt.name === "trigger_calendar" && !r.confirmed && r.available_windows?.length) {
+    card.className = "action calendar";
+    card.innerHTML = `<div class="title">${ICONS.calendar}<span>Pick an arrival window</span></div>
+      <div class="meta">${escapeHtml(r.meeting_type)} · 2-hour windows · the tech texts 30 minutes before</div>
+      <div class="windows">${r.available_windows.map((w) => `<button type="button" class="window-btn" data-window="${escapeHtml(w.label)}">${escapeHtml(w.label)}</button>`).join("")}</div>`;
+    for (const b of card.querySelectorAll(".window-btn")) {
+      b.addEventListener("click", () => {
+        if (controller) return;
+        for (const x of card.querySelectorAll(".window-btn")) { x.disabled = true; x.classList.toggle("picked", x === b); }
+        sendMessage(b.dataset.window);
+      });
+    }
+  } else if (evt.name === "trigger_calendar" && r.confirmed) {
+    card.className = "action booked";
+    card.innerHTML = `<div class="title">${ICONS.check}<span>Booked: ${escapeHtml(r.window.label)}</span></div>
+      <div class="meta">${escapeHtml(r.meeting_type)} · confirmation ${r.confirmation_sent_to?.length ? "sent to " + escapeHtml(r.confirmation_sent_to.join(" and ")) : "on its way"}</div>`;
+  } else if (evt.name === "trigger_calendar") {
+    card.className = "action calendar";
+    card.innerHTML = `<div class="title">${ICONS.calendar}<span>Book online</span></div><a class="fallback" href="${escapeHtml(r.booking_url)}" target="_blank" rel="noopener">Open the booking page ↗</a>`;
   } else if (evt.name === "capture_lead") {
-    card.innerHTML = `<div class="title">${tag}Details sent to the office</div>
-      <div class="meta">Reference ${escapeHtml(r.lead_id)} · delivered to ${escapeHtml(r.delivered_to === "crm_webhook" ? "the CRM" : "the inbox (see Business view)")}</div>`;
+    card.className = "action lead";
+    card.innerHTML = `<div class="title">${ICONS.send}<span>Sent to the office</span></div><div class="meta">They'll follow up; no pressure either way.</div>`;
   } else if (evt.name === "escalate_to_human") {
-    card.innerHTML = `<div class="title">${tag}A person has been notified</div>
-      <div class="meta">Ticket ${escapeHtml(r.ticket_id)} · fallback: <a href="tel:${escapeHtml(business.phone.replace(/\D/g, ""))}">${escapeHtml(business.phone)}</a></div>`;
+    const emergency = evt.input?.reason === "emergency";
+    card.className = "action handoff";
+    card.innerHTML = `<div class="title">${ICONS.phone}<span>${emergency ? "Dispatcher notified" : "A person has been notified"}</span></div>
+      <div class="meta">${emergency ? "Expect a call within 15 minutes." : "The office will call you back."} If not, call <a href="tel:${escapeHtml(business.phone.replace(/\D/g, ""))}">${escapeHtml(business.phone)}</a>.</div>`;
   }
   scrollToBottom();
 }
 
-// ─── Business view (drawer) ──────────────────────────────────────────────────
+// ─── What the business sees ──────────────────────────────────────────────────
 const CORE_FIELDS = new Set(["need", "role", "timeline", "budget_range", "location"]);
 
 function renderProfile(profile) {
@@ -195,24 +190,36 @@ function renderContact(fields) {
   }
 }
 
+/** One plain sentence per tool call, for people who don't read JSON. */
+function describeAction(evt) {
+  const i = evt.input ?? {};
+  switch (evt.name) {
+    case "update_lead_profile": {
+      const keys = Object.keys(i).filter((k) => k !== "temperature").map((k) => ({ need: "need", role: "authority", timeline: "timing", budget_range: "budget", location: "area", objection: "objection", notes: "notes", company: "company" }[k] ?? k));
+      return `Noted ${keys.length ? keys.join(", ") : "lead temperature"}${i.temperature ? ` · marked ${i.temperature}` : ""}`;
+    }
+    case "trigger_calendar": return i.selected_window ? `Booked the ${i.meeting_type.toLowerCase()} for ${i.prospect_name}` : `Offered arrival windows for a ${i.meeting_type.toLowerCase()}`;
+    case "capture_lead": return `Sent ${i.name}'s details to the office (${i.temperature} lead)`;
+    case "escalate_to_human": return i.reason === "emergency" ? `Paged the on-call dispatcher (urgency ${i.urgency})` : `Handed off to a person (${i.reason.replace(/_/g, " ")}, ${i.urgency})`;
+    default: return evt.name;
+  }
+}
+
 function logAction(evt) {
   actionCount += 1;
-  els.actionCount.textContent = String(actionCount);
+  els.actionCount.textContent = `${actionCount} action${actionCount === 1 ? "" : "s"}`;
   els.logEmpty.classList.add("hidden");
   const li = document.createElement("li");
   li.dataset.id = evt.id;
-  li.innerHTML = `<div class="row"><code>${escapeHtml(evt.name)}</code><button type="button" class="linkish">JSON</button><span class="pending">…</span></div>
+  li.innerHTML = `<span class="what">${escapeHtml(describeAction(evt))}</span>
+    <div class="row"><span class="name">${escapeHtml(evt.name)}</span><button type="button" class="linkish">data</button><span class="pending">…</span></div>
     <pre class="hidden">${escapeHtml(JSON.stringify({ input: evt.input }, null, 2))}</pre>`;
   li.querySelector("button").addEventListener("click", () => li.querySelector("pre").classList.toggle("hidden"));
   els.log.prepend(li);
 
-  // Contact details surface from whatever tool carried them.
-  const i = evt.input;
-  if (evt.name !== "update_lead_profile") {
-    renderContact({ name: i.prospect_name ?? i.name, phone: i.phone, email: i.email, location: i.location });
-  } else if (i.location) {
-    renderContact({ location: i.location });
-  }
+  const i = evt.input ?? {};
+  if (evt.name !== "update_lead_profile") renderContact({ name: i.prospect_name ?? i.name, phone: i.phone, email: i.email, location: i.location });
+  else if (i.location) renderContact({ location: i.location });
 }
 
 function logResult(evt) {
@@ -225,6 +232,9 @@ function logResult(evt) {
   const shown = JSON.parse(pre.textContent);
   shown.result = evt.result;
   pre.textContent = JSON.stringify(shown, null, 2);
+  if (evt.name === "trigger_calendar" && evt.result?.confirmed) {
+    li.querySelector(".what").textContent = `Booked ${evt.result.window.label} (${evt.result.meeting_type})`;
+  }
 }
 
 function addInbox(kind, title, meta) {
@@ -237,9 +247,9 @@ function addInbox(kind, title, meta) {
 
 const hooks = {
   onProfileUpdate: renderProfile,
-  onLeadCaptured: (lead) => addInbox("lead", `Lead: ${lead.name} · ${lead.temperature}`, `${lead.email}${lead.phone ? " · " + lead.phone : ""} — ${lead.need_summary}`),
-  onCalendar: (b) => addInbox("booking", `Booking request: ${b.meeting_type} · ${b.prospect_name}`, b.purpose),
-  onHandoff: (t) => addInbox("handoff", `Handoff (${t.reason}, ${t.urgency})`, t.summary),
+  onLeadCaptured: (lead) => addInbox("lead", `New lead: ${lead.name} · ${lead.temperature}`, `${lead.phone ?? lead.email} — ${lead.need_summary}`),
+  onCalendar: (b) => { if (b.status === "confirmed") addInbox("booking", `Booked: ${b.meeting_type} · ${b.window.label}`, `${b.prospect_name} · ${b.phone ?? b.email}${b.location ? " · " + b.location : ""} — ${b.purpose}`); },
+  onHandoff: (t) => addInbox("handoff", t.reason === "emergency" ? `Dispatch: ${t.name ?? "caller"} · ${t.phone ?? ""}` : `Call-back: ${t.reason.replace(/_/g, " ")} (${t.urgency})`, t.summary),
 };
 
 // ─── Agent events ────────────────────────────────────────────────────────────
@@ -252,7 +262,7 @@ function onEvent(evt) {
   }
 }
 
-// ─── Chips ───────────────────────────────────────────────────────────────────
+// ─── Quick replies ───────────────────────────────────────────────────────────
 function renderChips() {
   els.chips.innerHTML = "";
   for (const text of agent.suggestions()) {
@@ -267,8 +277,7 @@ function renderChips() {
 
 // ─── Sending ─────────────────────────────────────────────────────────────────
 function setBusy(busy) {
-  els.status.classList.toggle("busy", busy);
-  els.statusText.textContent = busy ? "Typing…" : "Online";
+  els.agentSub.innerHTML = busy ? `<i class="dot"></i> ${escapeHtml(business.agentName)} is typing…` : `<i class="dot"></i> ${escapeHtml(business.shortName)} · online now`;
   els.send.classList.toggle("hidden", busy);
   els.stop.classList.toggle("hidden", !busy);
   els.input.disabled = busy;
@@ -281,6 +290,7 @@ async function sendMessage(text) {
   if (!text || controller) return;
   els.input.value = "";
   autosize();
+  els.chips.innerHTML = "";
   addMessage("user", md(text));
   autoScroll = true;
   scrollToBottom(true);
@@ -299,14 +309,12 @@ async function sendMessage(text) {
     controller = null;
     setBusy(false);
     renderChips();
-    if (isChatOpen()) els.input.focus();
+    if (isChatOpen() && window.innerWidth > 640) els.input.focus();
   }
 }
 
 els.composer.addEventListener("submit", (e) => { e.preventDefault(); sendMessage(els.input.value); });
-els.input.addEventListener("keydown", (e) => {
-  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(els.input.value); }
-});
+els.input.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(els.input.value); } });
 els.stop.addEventListener("click", () => controller?.abort());
 function autosize() { els.input.style.height = "auto"; els.input.style.height = Math.min(els.input.scrollHeight, 120) + "px"; }
 els.input.addEventListener("input", autosize);
@@ -314,11 +322,7 @@ els.input.addEventListener("input", autosize);
 // ─── Widget open / close ─────────────────────────────────────────────────────
 const isChatOpen = () => document.body.classList.contains("chat-open");
 
-function bumpUnread() {
-  unread += 1;
-  els.unread.textContent = String(unread);
-  els.unread.classList.remove("hidden");
-}
+function bumpUnread() { unread += 1; els.unread.textContent = String(unread); els.unread.classList.remove("hidden"); }
 
 function openChat() {
   document.body.classList.add("chat-open");
@@ -330,11 +334,7 @@ function openChat() {
   scrollToBottom(true);
   if (window.innerWidth > 640) els.input.focus();
 }
-
-function closeChat() {
-  document.body.classList.remove("chat-open");
-  els.panel.classList.add("hidden");
-}
+function closeChat() { document.body.classList.remove("chat-open"); els.panel.classList.add("hidden"); }
 
 els.launcher.addEventListener("click", () => (isChatOpen() ? closeChat() : openChat()));
 els.panelMin.addEventListener("click", closeChat);
@@ -343,11 +343,7 @@ els.teaserClose.addEventListener("click", () => { els.teaser.classList.add("hidd
 
 // Any element on the site with data-chat-prompt hands that line to the concierge.
 for (const el of document.querySelectorAll("[data-chat-prompt]")) {
-  el.addEventListener("click", (e) => {
-    e.preventDefault();
-    openChat();
-    if (!controller) sendMessage(el.dataset.chatPrompt);
-  });
+  el.addEventListener("click", (e) => { e.preventDefault(); openChat(); if (!controller) sendMessage(el.dataset.chatPrompt); });
 }
 
 // ─── Business view ───────────────────────────────────────────────────────────
@@ -371,7 +367,7 @@ els.about.addEventListener("click", (e) => { if (e.target === els.about) els.abo
 // ─── Conversation lifecycle ──────────────────────────────────────────────────
 function clearConsole() {
   actionCount = 0;
-  els.actionCount.textContent = "0";
+  els.actionCount.textContent = "0 actions";
   els.log.innerHTML = "";
   els.logEmpty.classList.remove("hidden");
   els.inbox.innerHTML = "";
@@ -387,31 +383,19 @@ function resetConversation() {
   current = null;
   agent.reset();
   clearConsole();
-  addMessage(
-    "assistant",
-    md(`Hi, I'm ${business.agentName}, ${business.shortName}'s concierge. Heating, cooling or roof: what's going on? I can book a visit, give you straight pricing, or get the on-call team if it's urgent.`),
-  );
+  addMessage("assistant", md(`Hi, I'm ${business.agentName} with ${business.shortName}. Heating, cooling or roof — what's going on? I can book a visit, give you straight pricing, or get the on-call team if it's urgent.`));
   renderChips();
 }
-
 els.reset.addEventListener("click", resetConversation);
-els.showActions.addEventListener("change", () => {
-  document.body.classList.toggle("hide-actions", !els.showActions.checked);
-  store.set("showActions", els.showActions.checked ? "" : "off");
-});
+els.restartDemo.addEventListener("click", () => { resetConversation(); if (!isChatOpen()) openChat(); });
 
 // ─── Boot ────────────────────────────────────────────────────────────────────
 $("#agent-name").textContent = business.agentName;
 $("#agent-avatar").textContent = business.agentName[0];
-$("#agent-sub").textContent = `${business.shortName} · replies instantly`;
-document.body.classList.toggle("hide-actions", store.get("showActions") === "off");
-els.showActions.checked = store.get("showActions") !== "off";
-
 agent = createDemoAgent({ business, onEvent, hooks });
 resetConversation();
+setBusy(false);
 
-// First visit on a desktop: show the teaser, then open the chat so the concierge
-// is the first thing a visitor meets. Returning visitors just get the launcher.
 if (store.get("businessView") === "1" && window.innerWidth > 900) setBusinessView(true);
 const seen = store.get("chatSeen") === "1";
 if (!seen) {
