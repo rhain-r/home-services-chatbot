@@ -121,6 +121,7 @@ function addToolCard(evt) {
   current.textEl = null; // any text after this card starts a new part
   const card = document.createElement("div");
   card.className = "action";
+  card.dataset.reason = evt.input?.reason ?? "";
   card.innerHTML = `<div class="title">${ICONS.calendar}<span>One moment…</span></div>`;
   current.bubble.appendChild(card);
   current.cards.set(evt.id, card);
@@ -159,7 +160,7 @@ function completeToolCard(evt) {
     card.className = "action lead";
     card.innerHTML = `<div class="title">${ICONS.send}<span>Sent to the office</span></div><div class="meta">They'll follow up; no pressure either way.</div>`;
   } else if (evt.name === "escalate_to_human") {
-    const emergency = evt.input?.reason === "emergency";
+    const emergency = card.dataset.reason === "emergency";
     card.className = "action handoff";
     card.innerHTML = `<div class="title">${ICONS.phone}<span>${emergency ? "Dispatcher notified" : "A person has been notified"}</span></div>
       <div class="meta">${emergency ? "Expect a call within 15 minutes." : "The office will call you back."} If not, call <a href="tel:${escapeHtml(business.phone.replace(/\D/g, ""))}">${escapeHtml(business.phone)}</a>.</div>`;
