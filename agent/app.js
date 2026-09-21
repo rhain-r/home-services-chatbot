@@ -1,9 +1,10 @@
 /**
- * UI controller for the concierge demo page.
+ * UI controller for the demo page: the client's website, the concierge chat
+ * widget, and the "Business view" drawer.
  *
- * The page runs agent/demo-engine.js: a scripted concierge that walks the same
+ * The concierge is agent/demo-engine.js: a scripted agent that walks the same
  * stages and fires the same tools as the Claude-powered runtime
- * (agent/accre-agent.js), with no API key and no network. This file only
+ * (agent/accre-agent.js) with no API key and no network. This file only
  * renders; it never decides what the agent says.
  */
 
@@ -12,24 +13,17 @@ import { createDemoAgent } from "./demo-engine.js";
 
 const $ = (sel) => document.querySelector(sel);
 const els = {
-  messages: $("#messages"),
-  chips: $("#chips"),
-  composer: $("#composer"),
-  input: $("#input"),
-  send: $("#send"),
-  stop: $("#stop"),
-  reset: $("#reset"),
-  showActions: $("#show-actions"),
-  status: $("#status"),
-  statusText: $("#status-text"),
-  temp: $("#temp"),
-  tempLabel: $("#temp-label"),
-  profile: $("#profile"),
-  log: $("#log"),
-  logEmpty: $("#log-empty"),
-  actionCount: $("#action-count"),
-  inbox: $("#inbox"),
-  inboxEmpty: $("#inbox-empty"),
+  // widget
+  widget: $("#widget"), launcher: $("#launcher"), unread: $("#unread"), teaser: $("#teaser"), teaserClose: $("#teaser-close"),
+  panel: $("#panel"), panelMin: $("#panel-min"),
+  messages: $("#messages"), chips: $("#chips"), composer: $("#composer"), input: $("#input"), send: $("#send"), stop: $("#stop"),
+  reset: $("#reset"), showActions: $("#show-actions"), status: $("#status"), statusText: $("#status-text"),
+  // drawer
+  drawer: $("#drawer"), drawerClose: $("#drawer-close"), viewVisitor: $("#view-visitor"), viewBusiness: $("#view-business"),
+  temp: $("#temp"), tempLabel: $("#temp-label"), profile: $("#profile"), contact: $("#contact"),
+  log: $("#log"), logEmpty: $("#log-empty"), actionCount: $("#action-count"), inbox: $("#inbox"), inboxEmpty: $("#inbox-empty"),
+  // about
+  about: $("#about"), openAbout: $("#open-about"), aboutClose: $("#about-close"),
 };
 
 // ─── Persistence (per-browser conveniences only) ─────────────────────────────
@@ -48,6 +42,8 @@ let controller = null;
 let current = null;    // the assistant message being streamed
 let actionCount = 0;
 let autoScroll = true;
+let unread = 0;
+const contact = {};
 
 // ─── Rendering helpers ───────────────────────────────────────────────────────
 const escapeHtml = (s) =>
@@ -60,16 +56,13 @@ function md(text) {
       .replace(/\*\*(.+?)\*\*/g, "<b>$1</b>")
       .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
       .replace(/(^|[\s(])((https?:\/\/)[^\s<)]+)/g, '$1<a href="$2" target="_blank" rel="noopener">$2</a>');
-  const blocks = text.trim().split(/\n{2,}/);
-  return blocks
-    .map((block) => {
-      const lines = block.split("\n");
-      if (lines.every((l) => /^\s*[-•*]\s+/.test(l))) {
-        return `<ul>${lines.map((l) => `<li>${inline(l.replace(/^\s*[-•*]\s+/, ""))}</li>`).join("")}</ul>`;
-      }
-      return `<p>${lines.map(inline).join("<br>")}</p>`;
-    })
-    .join("");
+  return text.trim().split(/\n{2,}/).map((block) => {
+    const lines = block.split("\n");
+    if (lines.every((l) => /^\s*[-•*]\s+/.test(l))) {
+      return `<ul>${lines.map((l) => `<li>${inline(l.replace(/^\s*[-•*]\s+/, ""))}</li>`).join("")}</ul>`;
+    }
+    return `<p>${lines.map(inline).join("<br>")}</p>`;
+  }).join("");
 }
 
 function scrollToBottom(force = false) {
@@ -83,10 +76,10 @@ els.messages.addEventListener("scroll", () => {
 function addMessage(role, html = "") {
   const el = document.createElement("div");
   el.className = `msg ${role}`;
-  if (role === "user" || role === "assistant") {
+  if (role === "assistant") {
     const av = document.createElement("div");
     av.className = "mini-avatar";
-    av.textContent = role === "user" ? "You" : business.agentName[0];
+    av.textContent = business.agentName[0];
     el.appendChild(av);
   }
   const bubble = document.createElement("div");
@@ -100,7 +93,7 @@ function addMessage(role, html = "") {
 
 function startAssistantMessage() {
   const { el, bubble } = addMessage("assistant", '<div class="typing"><i></i><i></i><i></i></div>');
-  current = { el, bubble, textEl: null, text: "", typing: bubble.firstElementChild, cards: new Map() };
+  current = { el, bubble, textEl: null, text: "", typing: bubble.firstElementChild, cards: new Map(), counted: false };
 }
 
 function appendText(delta) {
@@ -114,6 +107,7 @@ function appendText(delta) {
   current.text += delta;
   current.textEl.innerHTML = md(current.text);
   scrollToBottom();
+  if (!current.counted && !isChatOpen()) { current.counted = true; bumpUnread(); }
 }
 
 function finishAssistantMessage() {
@@ -126,15 +120,14 @@ function finishAssistantMessage() {
 // ─── Action cards (inside the chat) ──────────────────────────────────────────
 const CARD_TITLES = {
   trigger_calendar: ["calendar", "Opening the booking calendar"],
-  capture_lead: ["lead", "Sending your details to the team"],
-  escalate_to_human: ["handoff", "Handing this to a person"],
+  capture_lead: ["lead", "Sending your details to the office"],
+  escalate_to_human: ["handoff", "Reaching the on-call team"],
 };
 
 function addToolCard(evt) {
   if (!current) startAssistantMessage();
   if (current.typing) { current.typing.remove(); current.typing = null; }
-  // Any text after this card belongs to a new text part.
-  current.textEl = null;
+  current.textEl = null; // text after this card starts a new part
 
   if (evt.name === "update_lead_profile") {
     const note = document.createElement("div");
@@ -146,7 +139,6 @@ function addToolCard(evt) {
     scrollToBottom();
     return;
   }
-
   const [kind, title] = CARD_TITLES[evt.name] ?? ["generic", evt.name];
   const card = document.createElement("div");
   card.className = `action ${kind}`;
@@ -169,19 +161,19 @@ function completeToolCard(evt) {
   if (evt.name === "trigger_calendar") {
     card.innerHTML = `<div class="title">${tag}Booking calendar ready</div>
       <div class="meta">${escapeHtml(r.meeting_type)} · pick any slot that suits you</div>
-      <a class="btn small" href="${escapeHtml(r.booking_url)}" target="_blank" rel="noopener">Open booking calendar ↗</a>`;
+      <a class="btn btn-primary" href="${escapeHtml(r.booking_url)}" target="_blank" rel="noopener">Open booking calendar ↗</a>`;
   } else if (evt.name === "capture_lead") {
-    card.innerHTML = `<div class="title">${tag}Details sent to the team</div>
-      <div class="meta">Reference ${escapeHtml(r.lead_id)} · delivered to ${escapeHtml(r.delivered_to === "crm_webhook" ? "your CRM webhook" : "the inbox on the right")}</div>`;
+    card.innerHTML = `<div class="title">${tag}Details sent to the office</div>
+      <div class="meta">Reference ${escapeHtml(r.lead_id)} · delivered to ${escapeHtml(r.delivered_to === "crm_webhook" ? "the CRM" : "the inbox (see Business view)")}</div>`;
   } else if (evt.name === "escalate_to_human") {
     card.innerHTML = `<div class="title">${tag}A person has been notified</div>
-      <div class="meta">Ticket ${escapeHtml(r.ticket_id)} · fallback: <a href="mailto:${escapeHtml(r.fallback_email)}">${escapeHtml(r.fallback_email)}</a></div>`;
+      <div class="meta">Ticket ${escapeHtml(r.ticket_id)} · fallback: <a href="tel:${escapeHtml(business.phone.replace(/\D/g, ""))}">${escapeHtml(business.phone)}</a></div>`;
   }
   scrollToBottom();
 }
 
-// ─── Console (right-hand side) ───────────────────────────────────────────────
-const CORE_FIELDS = new Set(["need", "role", "timeline", "budget_range"]);
+// ─── Business view (drawer) ──────────────────────────────────────────────────
+const CORE_FIELDS = new Set(["need", "role", "timeline", "budget_range", "location"]);
 
 function renderProfile(profile) {
   for (const dd of els.profile.querySelectorAll("dd")) {
@@ -191,7 +183,16 @@ function renderProfile(profile) {
   }
   const t = profile.temperature ?? "unknown";
   for (const span of els.temp.children) span.classList.toggle("on", span.classList.contains(t));
-  els.tempLabel.textContent = t === "unknown" ? "—" : t === "disqualified" ? "not a fit" : t;
+  els.tempLabel.textContent = t === "unknown" ? "no signal yet" : t === "disqualified" ? "not a fit" : t.toUpperCase();
+}
+
+function renderContact(fields) {
+  Object.assign(contact, Object.fromEntries(Object.entries(fields).filter(([, v]) => v)));
+  for (const dd of els.contact.querySelectorAll("dd")) {
+    const v = contact[dd.dataset.c];
+    dd.textContent = v || "—";
+    dd.classList.toggle("empty", !v);
+  }
 }
 
 function logAction(evt) {
@@ -204,6 +205,14 @@ function logAction(evt) {
     <pre class="hidden">${escapeHtml(JSON.stringify({ input: evt.input }, null, 2))}</pre>`;
   li.querySelector("button").addEventListener("click", () => li.querySelector("pre").classList.toggle("hidden"));
   els.log.prepend(li);
+
+  // Contact details surface from whatever tool carried them.
+  const i = evt.input;
+  if (evt.name !== "update_lead_profile") {
+    renderContact({ name: i.prospect_name ?? i.name, phone: i.phone, email: i.email, location: i.location });
+  } else if (i.location) {
+    renderContact({ location: i.location });
+  }
 }
 
 function logResult(evt) {
@@ -228,8 +237,8 @@ function addInbox(kind, title, meta) {
 
 const hooks = {
   onProfileUpdate: renderProfile,
-  onLeadCaptured: (lead) => addInbox("lead", `Lead: ${lead.name} · ${lead.temperature}`, `${lead.email} — ${lead.need_summary}`),
-  onCalendar: (b) => addInbox("booking", `Booking request: ${b.prospect_name}`, `${b.meeting_type} — ${b.purpose}`),
+  onLeadCaptured: (lead) => addInbox("lead", `Lead: ${lead.name} · ${lead.temperature}`, `${lead.email}${lead.phone ? " · " + lead.phone : ""} — ${lead.need_summary}`),
+  onCalendar: (b) => addInbox("booking", `Booking request: ${b.meeting_type} · ${b.prospect_name}`, b.purpose),
   onHandoff: (t) => addInbox("handoff", `Handoff (${t.reason}, ${t.urgency})`, t.summary),
 };
 
@@ -243,7 +252,7 @@ function onEvent(evt) {
   }
 }
 
-// ─── Chips (stage-aware suggestions from the engine) ─────────────────────────
+// ─── Chips ───────────────────────────────────────────────────────────────────
 function renderChips() {
   els.chips.innerHTML = "";
   for (const text of agent.suggestions()) {
@@ -259,7 +268,7 @@ function renderChips() {
 // ─── Sending ─────────────────────────────────────────────────────────────────
 function setBusy(busy) {
   els.status.classList.toggle("busy", busy);
-  els.statusText.textContent = busy ? "Thinking…" : "Online";
+  els.statusText.textContent = busy ? "Typing…" : "Online";
   els.send.classList.toggle("hidden", busy);
   els.stop.classList.toggle("hidden", !busy);
   els.input.disabled = busy;
@@ -290,7 +299,7 @@ async function sendMessage(text) {
     controller = null;
     setBusy(false);
     renderChips();
-    els.input.focus();
+    if (isChatOpen()) els.input.focus();
   }
 }
 
@@ -299,8 +308,65 @@ els.input.addEventListener("keydown", (e) => {
   if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(els.input.value); }
 });
 els.stop.addEventListener("click", () => controller?.abort());
-function autosize() { els.input.style.height = "auto"; els.input.style.height = Math.min(els.input.scrollHeight, 140) + "px"; }
+function autosize() { els.input.style.height = "auto"; els.input.style.height = Math.min(els.input.scrollHeight, 120) + "px"; }
 els.input.addEventListener("input", autosize);
+
+// ─── Widget open / close ─────────────────────────────────────────────────────
+const isChatOpen = () => document.body.classList.contains("chat-open");
+
+function bumpUnread() {
+  unread += 1;
+  els.unread.textContent = String(unread);
+  els.unread.classList.remove("hidden");
+}
+
+function openChat() {
+  document.body.classList.add("chat-open");
+  els.panel.classList.remove("hidden");
+  els.teaser.classList.add("hidden");
+  unread = 0;
+  els.unread.classList.add("hidden");
+  store.set("chatSeen", "1");
+  scrollToBottom(true);
+  if (window.innerWidth > 640) els.input.focus();
+}
+
+function closeChat() {
+  document.body.classList.remove("chat-open");
+  els.panel.classList.add("hidden");
+}
+
+els.launcher.addEventListener("click", () => (isChatOpen() ? closeChat() : openChat()));
+els.panelMin.addEventListener("click", closeChat);
+els.teaser.addEventListener("click", (e) => { if (e.target !== els.teaserClose) openChat(); });
+els.teaserClose.addEventListener("click", () => { els.teaser.classList.add("hidden"); store.set("teaserDismissed", "1"); });
+
+// Any element on the site with data-chat-prompt hands that line to the concierge.
+for (const el of document.querySelectorAll("[data-chat-prompt]")) {
+  el.addEventListener("click", (e) => {
+    e.preventDefault();
+    openChat();
+    if (!controller) sendMessage(el.dataset.chatPrompt);
+  });
+}
+
+// ─── Business view ───────────────────────────────────────────────────────────
+function setBusinessView(open) {
+  document.body.classList.toggle("business-open", open);
+  els.drawer.setAttribute("aria-hidden", String(!open));
+  els.viewVisitor.classList.toggle("active", !open);
+  els.viewBusiness.classList.toggle("active", open);
+  store.set("businessView", open ? "1" : "");
+  if (open && !isChatOpen() && window.innerWidth > 900) openChat();
+}
+els.viewVisitor.addEventListener("click", () => setBusinessView(false));
+els.viewBusiness.addEventListener("click", () => setBusinessView(true));
+els.drawerClose.addEventListener("click", () => setBusinessView(false));
+
+// ─── About ───────────────────────────────────────────────────────────────────
+els.openAbout.addEventListener("click", () => els.about.showModal());
+els.aboutClose.addEventListener("click", () => els.about.close());
+els.about.addEventListener("click", (e) => { if (e.target === els.about) els.about.close(); });
 
 // ─── Conversation lifecycle ──────────────────────────────────────────────────
 function clearConsole() {
@@ -310,6 +376,8 @@ function clearConsole() {
   els.logEmpty.classList.remove("hidden");
   els.inbox.innerHTML = "";
   els.inboxEmpty.classList.remove("hidden");
+  for (const k of Object.keys(contact)) delete contact[k];
+  renderContact({});
   renderProfile({});
 }
 
@@ -321,7 +389,7 @@ function resetConversation() {
   clearConsole();
   addMessage(
     "assistant",
-    md(`Hi, I'm ${business.agentName}, ${business.name}'s concierge. Ask me anything about what we do, or tell me what's going on in your business and I'll point you in the right direction.`),
+    md(`Hi, I'm ${business.agentName}, ${business.shortName}'s concierge. Heating, cooling or roof: what's going on? I can book a visit, give you straight pricing, or get the on-call team if it's urgent.`),
   );
   renderChips();
 }
@@ -335,9 +403,21 @@ els.showActions.addEventListener("change", () => {
 // ─── Boot ────────────────────────────────────────────────────────────────────
 $("#agent-name").textContent = business.agentName;
 $("#agent-avatar").textContent = business.agentName[0];
-$("#agent-sub").textContent = `${business.name} · demo`;
+$("#agent-sub").textContent = `${business.shortName} · replies instantly`;
 document.body.classList.toggle("hide-actions", store.get("showActions") === "off");
 els.showActions.checked = store.get("showActions") !== "off";
 
 agent = createDemoAgent({ business, onEvent, hooks });
 resetConversation();
+
+// First visit on a desktop: show the teaser, then open the chat so the concierge
+// is the first thing a visitor meets. Returning visitors just get the launcher.
+if (store.get("businessView") === "1" && window.innerWidth > 900) setBusinessView(true);
+const seen = store.get("chatSeen") === "1";
+if (!seen) {
+  setTimeout(() => { if (!isChatOpen() && store.get("teaserDismissed") !== "1") els.teaser.classList.remove("hidden"); }, 1200);
+  if (window.innerWidth > 900) setTimeout(() => { if (!isChatOpen()) openChat(); }, 3200);
+  else bumpUnread();
+} else if (store.get("teaserDismissed") !== "1") {
+  setTimeout(() => { if (!isChatOpen()) els.teaser.classList.remove("hidden"); }, 1500);
+}

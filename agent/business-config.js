@@ -5,44 +5,48 @@
  * Change this file (and agent/knowledge-base.md) to point the concierge at
  * your own business. Nothing else needs to change.
  *
- * Works in the browser (agent/index.html) and in Node (agent/cli.mjs, tests).
+ * The sample business is a fictional home-services company. Phone numbers,
+ * emails and links are placeholders.
  */
 
 export const business = {
   // [BUSINESS_NAME]
-  name: "Northwind Automation",
+  name: "Summit Heating, Air & Roofing",
+  shortName: "Summit",
   // [AGENT_NAME]
-  agentName: "Nova",
+  agentName: "Riley",
   // [INDUSTRY]
-  industry: "AI automation and custom AI agent studio",
+  industry: "residential HVAC and roofing (home services)",
   // [BUSINESS_DESCRIPTION]
   description:
-    "We design, build and run AI agents and workflow automations for small and mid-sized businesses that want to stop losing hours (and leads) to manual work.",
+    "Family-owned since 2009, we repair, maintain and replace heating and cooling systems and roofs for homeowners across the Denver metro area, with 24/7 emergency service.",
   // [PRIMARY_CTA]
-  primaryCta: "book a free 20-minute Automation Audit call",
+  primaryCta: "book a service call or a free in-home estimate",
   // [SECONDARY_CTA]
-  secondaryCta:
-    "send them a short written recommendation by email and follow up in a week",
+  secondaryCta: "text or email them the relevant pricing sheet and have the office follow up",
   // [BOOKING_URL]
-  bookingUrl: "https://cal.com/northwind-automation/audit-call",
+  bookingUrl: "https://cal.com/summit-hvac/book",
   // [SUPPORT_EMAIL]
-  supportEmail: "hello@northwind-automation.example",
+  supportEmail: "hello@summit-hvac.example",
+  phone: "(303) 555-0148",
+  address: "4120 Brighton Blvd, Denver, CO 80216",
   // [BUSINESS_HOURS]
-  businessHours: "Monday to Friday, 9:00 to 18:00 Eastern Time (UTC-5). Replies to messages sent outside hours go out the next business morning.",
+  businessHours:
+    "Office and scheduling: Monday to Saturday, 7:00 to 19:00 Mountain Time. Emergency repairs: 24 hours a day, 7 days a week, including holidays.",
   // [SERVICES_SUMMARY]
   servicesSummary:
-    "AI website concierge agents; back-office workflow automation (CRM, email, scheduling, documents); AI Automation Audit (fixed-scope diagnostic); ongoing Automation Retainer.",
+    "AC and furnace repair (same-day in most cases); heat pump, AC and furnace installation with financing; Comfort Club maintenance plan; roof repair, replacement and storm-damage inspections; 24/7 emergency service.",
   // [IDEAL_CLIENT_PROFILE]
   idealClientProfile:
-    "Service businesses and e-commerce brands with 5 to 100 staff, an existing flow of inbound leads or support requests, and at least one person who owns operations. Typical: agencies, clinics, law and accounting firms, home-services companies, DTC brands.",
+    "Homeowners (and property managers with authority to approve work) in the Denver metro service area who need a repair now, want a system or roof replaced, or want to prevent breakdowns with a maintenance plan.",
   // [PRICING_POSTURE]
   pricingPosture:
-    "Transparent tiered pricing published in the knowledge base; quotes are ranges, final scope is confirmed on the audit call.",
+    "Transparent flat-rate pricing: diagnostic and tune-up fees are fixed and published; repair quotes are given after diagnosis and before any work starts; replacements and roofing get a free in-home estimate. Ranges in the knowledge base are typical, not quotes.",
   // [MINIMUM_ENGAGEMENT]
-  minimumEngagement: "$2,500 (the Automation Audit)",
+  minimumEngagement: "$89 diagnostic visit (waived if the repair is approved the same visit)",
   // [DIFFERENTIATORS]
   differentiators:
-    "Fixed-scope audit before anyone commits to a build; every agent ships with human-in-the-loop approval gates; we run and monitor what we build rather than hand over a zip file; 30-day tuning period included on every build.",
+    "Same-day service in most cases and true 24/7 emergency dispatch; flat-rate quotes before work starts, never hourly surprises; NATE-certified, background-checked technicians; 1-year labor warranty on every repair; one company for HVAC and roofing, so storm damage gets one visit, not three.",
 };
 
 /**

@@ -1,109 +1,124 @@
-# Northwind Automation — Concierge Knowledge Base
+# Summit Heating, Air & Roofing — Concierge Knowledge Base
 
-This file is the concierge's single source of truth. If a fact is not written here, the agent must say it does not know and offer a human. Keep it current; keep it factual; no marketing adjectives the team cannot back up.
+This file is the concierge's single source of truth. If a fact is not written here, the agent must say it does not know and offer the office. Keep it current; keep it factual. This is a fictional company used for the demo; every number below is sample data.
 
 ## Company
 
-- Legal / trading name: Northwind Automation
-- What we do: we design, build and operate AI agents and workflow automations for small and mid-sized businesses.
-- Founded: 2023. Team of 9 (engineers, an automation strategist, a client success lead).
-- Location: remote-first team based in the US (Eastern Time). We work with clients in the US, Canada, UK, Ireland and Australia.
-- Hours: Monday to Friday, 9:00 to 18:00 Eastern Time. Emergency support for retainer clients is covered separately (see Retainer).
-- Contact: hello@northwind-automation.example
-- Booking link: https://cal.com/northwind-automation/audit-call
-- Languages: English (all services). Spanish-language agents can be built; our own team communicates in English.
+- Name: Summit Heating, Air & Roofing ("Summit")
+- What we do: residential heating and cooling repair, maintenance and installation, plus roof repair, replacement and storm-damage work.
+- Family-owned since 2009. 34 employees, 14 service trucks.
+- Office: 4120 Brighton Blvd, Denver, CO 80216
+- Phone: (303) 555-0148 (calls and texts). Email: hello@summit-hvac.example
+- Booking link: https://cal.com/summit-hvac/book
+- Hours: office and scheduling Monday to Saturday, 7:00 to 19:00 Mountain Time. Emergency repairs 24/7, including holidays.
+- Licensed, bonded and insured in Colorado. Technicians are NATE-certified and background-checked. We do not name specific license numbers in chat; the office provides them on request.
+- Reviews: 4.9 average across 1,200+ public reviews.
+- Languages: English and Spanish (office staff and several technicians).
 
-## Who we are a fit for
+## Service area
 
-Best fit:
-- Service businesses and e-commerce brands with roughly 5 to 100 staff.
-- An existing, steady flow of inbound leads, bookings or support requests (at least ~50 conversations a month).
-- Someone internal who owns operations and can make decisions on tooling.
-- Typical clients: marketing agencies, dental and medical clinics, law and accounting firms, home-services companies (HVAC, roofing, cleaning), DTC e-commerce brands.
+We serve the Denver metro area, roughly within 35 miles of downtown Denver: Denver, Aurora, Lakewood, Littleton, Englewood, Centennial, Parker, Highlands Ranch, Arvada, Westminster, Thornton, Broomfield, Golden, Wheat Ridge, Commerce City, Brighton, Castle Rock.
 
-Not a fit (say so early and kindly):
-- Solo founders pre-revenue or with fewer than ~20 inbound conversations a month: the build cost usually outweighs the benefit. Suggest an off-the-shelf chatbot tool and come back when volume grows.
-- Businesses that need us to write their core product software: we build automation around a business, not the product itself.
-- Regulated use cases requiring us to make medical, legal or financial decisions on a client's behalf. We can automate intake and admin around those decisions, never the decision itself.
-- Budgets under $2,500 total.
+Not served: Colorado Springs, Fort Collins, Boulder County beyond Broomfield, mountain towns, and anywhere outside Colorado. If a visitor is outside the area, say so plainly and early. We do not have referral partners to recommend.
 
 ## Services
 
-### 1. AI Automation Audit (the entry point for every new client)
-- What it is: a fixed-scope, two-week diagnostic. We map your inbound and back-office workflows, quantify where time and leads are being lost, and deliver a prioritised automation roadmap with cost/benefit for each item.
-- Deliverables: workflow map, opportunity scorecard (hours saved, revenue at risk, effort), a written roadmap, and a 60-minute readout call.
-- Price: $2,500 fixed.
-- Timeline: 2 weeks from kickoff.
-- Credit: if you proceed to any build within 60 days of the readout, the full $2,500 is credited against the build.
-- Requirements from the client: ~3 hours of a team member's time across two weeks, read access to the tools involved (CRM, inbox, booking tool).
-- Meeting type name: "Automation Audit call" (the free 20-minute intro that starts this).
+### Heating and cooling repair
+- Diagnostic visit: $89 flat, Monday to Saturday 7:00 to 19:00. Waived if you approve the repair on the same visit.
+- Emergency visit (after hours, Sundays, holidays): $149 flat. Waived the same way. Comfort Club members pay the standard $89 at any hour.
+- Same-day service is available most days when you book before 14:00; otherwise next business day. Emergencies (no heat below freezing, no cooling for an at-risk household, water leaking from equipment) are dispatched the same day, any hour.
+- Every repair is quoted flat-rate after diagnosis and before any work starts. No hourly billing.
+- Typical repair ranges (for orientation only; the technician quotes the exact price on site):
+  - Capacitor: $180 to $300
+  - Ignitor or flame sensor: $200 to $350
+  - Refrigerant leak find-and-recharge: $250 to $600 (older R-22 systems cost more and are usually better replaced)
+  - Blower motor: $450 to $900
+  - Control board: $400 to $800
+- Repair warranty: 1 year on parts and labor.
+- Brands: we service all major residential brands (Carrier, Trane, Lennox, Rheem, Goodman, Bryant, American Standard, Daikin, Mitsubishi and others).
 
-### 2. AI Website Concierge (custom lead-capture and support agent)
-- What it is: a conversational agent on your website (and optionally SMS / WhatsApp) that answers questions from your own knowledge base, qualifies leads, books meetings into your calendar and hands off to a human when needed.
-- Includes: knowledge base setup from your existing content, custom persona and playbook, calendar integration (Calendly, Cal.com, HubSpot Meetings, Google Calendar), CRM integration (HubSpot, Pipedrive, GoHighLevel, Salesforce, or a webhook to anything else), human handoff to email or Slack, weekly conversation review for the first 30 days.
-- Price: from $6,500 to $14,000 one-time build depending on channels and integrations, plus a hosting and monitoring plan from $350/month.
-- Timeline: typically 3 to 5 weeks from kickoff to live.
-- What we do NOT do: we do not sell a generic chatbot subscription. Every concierge is built on the client's knowledge base with approval gates.
+### Maintenance: Comfort Club
+- $19/month per home, cancel any time after the first 12 months.
+- Includes: spring AC tune-up and fall furnace tune-up, priority scheduling, 15% off all repairs, no after-hours fee, annual roof visual check, reminders handled for you.
+- One-off tune-up without the plan: $129 per system.
 
-### 3. Back-office Workflow Automation
-- What it is: automating repetitive multi-step work between the tools you already use: lead routing, intake forms to CRM, proposal and document generation, appointment reminders, invoice chasing, review requests, reporting.
-- Tools we work with: HubSpot, Pipedrive, Salesforce, GoHighLevel, Zapier, Make, n8n, Google Workspace, Microsoft 365, Slack, QuickBooks, Xero, Stripe, Shopify, Klaviyo, Calendly, Cal.com, Jobber, ServiceTitan (via API). If a tool has an API, we can usually connect it; confirm on the audit call.
-- Price: individual automations from $1,800 to $6,000 each; most clients bundle 3 to 6 automations in a first phase between $8,000 and $25,000.
-- Timeline: 2 to 6 weeks depending on scope.
+### Installation and replacement
+- Free in-home estimate (60 to 90 minutes). We size the system to the house; we do not quote installs over chat.
+- Typical installed ranges (Denver metro, standard single-family home):
+  - Central AC: $6,500 to $12,500
+  - Gas furnace: $4,500 to $9,000
+  - Heat pump (heating and cooling): $9,000 to $16,000, before rebates
+  - Full system (furnace + AC) replaced together: $10,000 to $19,000
+- Financing: 0% APR for 18 months, or fixed-rate terms up to 120 months, with approved credit through our lending partner. Applications take about 10 minutes; the estimator handles it.
+- Rebates: Xcel Energy and federal tax credits often apply to high-efficiency and heat-pump systems; the estimator confirms current amounts. Do not quote rebate dollar figures in chat.
+- Timeline: most installs are completed within 3 to 7 days of the estimate; emergency replacements (no heat in winter) can usually be done within 48 hours.
+- Install warranty: 10-year manufacturer parts warranty (registered for you) plus 2-year Summit labor warranty.
 
-### 4. Automation Retainer (ongoing)
-- What it is: we run, monitor, tune and extend what we built, and keep building from the roadmap.
-- Tiers:
-  - Maintain: $1,500/month. Monitoring, fixes, monthly report, up to 6 hours of changes.
-  - Grow: $3,500/month. Everything in Maintain plus up to 16 hours of new automation work and a monthly strategy call.
-  - Scale: $7,000/month. Everything in Grow plus up to 36 hours, a dedicated strategist, and same-business-day emergency response.
-- Minimum term: 3 months, then month-to-month with 30 days' notice.
+### Roofing
+- Free roof inspection with a written report and photos, usually within 2 business days (same day after major storms is not guaranteed).
+- Repairs: $350 to $1,500 typical (missing shingles, flashing, small leaks).
+- Full replacement, asphalt shingle, typical 2,000 sq ft home: $9,500 to $18,000. Metal roofing: $22,000 to $40,000.
+- Storm and hail damage: we document the damage, meet the insurance adjuster on site, and handle the claim paperwork. We do not promise what an insurer will approve.
+- Workmanship warranty: 10 years. Manufacturer shingle warranties: 25 to 50 years depending on product.
+- Timeline: most replacements are done in 1 to 2 days once materials arrive (usually within 2 weeks).
 
-## How we work (process)
+### Emergencies and safety (always follow)
+- Smell of gas, or a carbon-monoxide alarm sounding: tell the visitor to leave the house immediately, not to touch light switches or appliances, and to call their gas utility's emergency line or 911 from outside. Only after that, offer to escalate to our dispatcher. Never troubleshoot a gas smell in chat.
+- No heat when it is below freezing, no cooling for infants, elderly or medically vulnerable people, or water actively leaking from equipment or the roof: treat as an emergency; route to the dispatcher (escalate_to_human, urgency high). The on-call dispatcher calls back within 15 minutes, 24/7.
+- Electrical burning smell from the furnace: switch the system off at the thermostat and the breaker, then book an emergency visit.
 
-1. Free 20-minute Automation Audit call: understand the situation, confirm fit, agree whether the paid Audit makes sense.
-2. Audit (2 weeks): workflow mapping and roadmap.
-3. Build: fixed scope, fixed price, weekly check-ins. Every agent or automation includes a human-in-the-loop approval step until the client chooses to remove it.
-4. Launch and 30-day tuning period: included in every build. We review real conversations / runs weekly and adjust.
-5. Retainer (optional): ongoing operation and growth.
+## Who we are a fit for
 
-Human-in-the-loop policy: nothing our systems build sends money, signs anything, or publishes to customers without a configured approval step, unless the client explicitly removes that gate in writing.
+- Homeowners in the service area. Property managers and landlords who can approve work.
+- Renters: we are happy to help, but the owner or property manager must authorise and pay for the work. Offer to send the renter information they can forward, and ask for the owner's contact if they have it.
 
-## Results we can cite (anonymised, approved for use)
+Not a fit: commercial refrigeration, walk-in coolers, boilers over 400,000 BTU, mobile-home furnaces, plumbing, electrical panel work, appliance repair, window units. Say so kindly; we have no referral list.
 
-- Home-services company (HVAC, 40 staff): website concierge plus lead routing. Missed-lead rate after hours fell from ~35% to under 5% in the first 60 days; booked estimates up 22% quarter over quarter.
-- Dental group (3 locations): appointment reminder and re-booking automation. No-show rate fell from 14% to 8% over 90 days; front desk saved roughly 25 hours a week.
-- Marketing agency (18 staff): proposal generation and CRM hygiene automations. Proposal turnaround went from 3 days to same day; ~12 hours a week saved.
-- Typical first results: most clients see measurable change within 3 to 4 weeks of going live. We do not guarantee specific numbers; results depend on volume and the client's follow-through.
+## How booking works
 
-Do NOT name clients. Do NOT quote any numbers other than the ones above.
+1. Visitor books online (link above) or the office calls back within one business hour during office hours.
+2. Confirmation by text and email with a 2-hour arrival window.
+3. Technician texts when 30 minutes away. Technicians wear shoe covers and clean up.
+4. Diagnosis, flat-rate quote, approval, repair. Payment by card, check, or financing for larger work.
+
+Meeting types (for trigger_calendar):
+- "Service call": repair diagnostic. Default for anything broken.
+- "Free estimate": system replacement, new installation, or roofing replacement.
+- "Roof inspection": leaks, storm or hail damage, selling a home.
+- "Tune-up": seasonal maintenance or Comfort Club enrolment visit.
+- Emergencies are NOT booked through the calendar; use escalate_to_human with urgency high so the dispatcher calls.
+
+Required to book: name, phone number (the crew texts arrival updates), email (confirmation), and ZIP code (to confirm the service area and route the truck). Ask for the street address only if the visitor offers it; the office confirms it on the call-back.
+
+## Results we can cite
+
+- Average arrival within the promised window: 96% of visits last year.
+- Average same-day dispatch time in summer: 3 hours 40 minutes from booking to technician on site.
+- 1,200+ public reviews, 4.9 average.
+- Do not name individual customers. Do not quote other numbers.
 
 ## Pricing FAQ
 
-- Do you offer discounts? The concierge cannot offer discounts. Pricing is discussed on a call with the team. The only standing offer is the Audit credit (the $2,500 Audit fee is credited against a build started within 60 days).
-- Payment terms: builds are 50% at kickoff, 50% at launch. Audit is paid upfront. Retainers are billed monthly in advance. Card, ACH and bank transfer accepted.
-- Is there a guarantee? Every build includes a 30-day tuning period. If a build does not perform to the agreed acceptance criteria at launch, we keep working on it at no extra cost until it does. We do not offer money-back guarantees on results.
-- Do you require a retainer? No. The retainer is optional; many clients start with a build only.
-- Can we start smaller than $2,500? No. The Audit is the smallest engagement.
+- Do you offer discounts or coupons? The concierge cannot offer discounts. The only standing benefits are the Comfort Club (15% off repairs, no after-hours fee) and the waived diagnostic fee when a repair is approved the same visit. Seasonal promotions, if any, are confirmed by the office; do not invent one.
+- Is the estimate really free? Yes, for replacements and roofing. Diagnostic visits for repairs are $89 ($149 emergency), waived with an approved repair.
+- Do you price-match? No formal price-match. If another quote is lower, we are glad to explain what ours includes (permits, disposal, warranty registration, labor warranty) so the visitor can compare properly.
+- Payment: card, check, ACH, financing. Deposits: 30% on installs and roofing, balance on completion.
 
 ## Common objections and approved responses (facts only)
 
-- "A chatbot SaaS is cheaper." True for the subscription. The difference is that our concierge is built on your knowledge base, integrated into your calendar and CRM, includes handoff to humans, and we review real conversations for the first 30 days. If you just need FAQ deflection at low volume, a SaaS tool is genuinely the better choice; say so.
-- "We could hire a freelancer." Possible. What we add: a fixed-scope audit before any build, a team (not one person) that runs and monitors the system, and the approval-gate policy. If continuity matters to you, that is the difference.
-- "We tried automation before and it broke." Most failures we see come from automations built without monitoring or an owner. Every build we ship includes monitoring and a 30-day tuning period, and the retainer exists precisely to keep things running.
-- "Will it sound like a robot?" The concierge uses your own tone guidelines and knowledge base; clients approve the persona and playbook before launch, and we review real transcripts weekly for the first month.
-- "Is our data safe?" We work inside the client's own accounts (their CRM, their calendar, their inbox) with least-privilege access, sign an NDA and a DPA on request, and delete our access at project end unless on retainer. We do not train models on client data. Specific security questionnaires go to the team.
-
-## Meeting types (for trigger_calendar)
-
-- "Automation Audit call": free, 20 minutes, video. For new prospects. Default choice.
-- "Retainer review": 30 minutes, for existing retainer clients only.
-- "Enterprise scoping": 45 minutes, for organisations over 100 staff or with procurement / security requirements. Route via escalate_to_human first if requirements are unusual.
+- "Another company charges less for the visit." Fair. Ours is $89 and it is waived if you go ahead with the repair, and every quote is flat-rate before work starts. If the other company's visit fee is lower but they bill hourly, the totals often end up close; worth asking them.
+- "Can't I just get a handyman?" For some things, yes. For anything involving gas, refrigerant or electrical on an HVAC system, Colorado requires licensed work, and unlicensed repairs can void the manufacturer warranty. Say this once, without lecturing.
+- "I'll just replace it myself / buy online." Equipment bought online usually carries no manufacturer warranty without a licensed install. We are happy to give a free estimate so the comparison is real.
+- "Your replacement quote is higher than expected." Ask what they were expecting and what the other quote includes. Offer the free estimate (sizing matters), financing at 0% for 18 months, and the option of a repair to buy time if the system is under ~12 years old.
+- "We had a bad experience with a contractor before." Ask what happened. Point to the flat-rate quote before work, the 2-hour window with a 30-minute text, the labor warranty, and the public reviews.
+- "Is it really 24/7?" Yes. The emergency visit fee is $149 ($89 for Comfort Club members), and the dispatcher calls back within 15 minutes.
 
 ## Things the concierge must NOT claim
 
-- Specific delivery dates before an audit.
-- Compatibility with a tool not listed above without saying "confirm on the call".
-- Any discount, free build, or "pilot".
-- That we are HIPAA / SOC 2 certified. We are not currently certified; we can work within a client's compliance requirements and will sign a BAA only after review by the team.
-- Anything about competitors' pricing, features or reliability.
+- An exact repair price before a technician has diagnosed the system.
+- An install or roofing price without an in-home estimate.
+- A specific arrival time; only the office confirms the 2-hour window.
+- Rebate or insurance-claim amounts.
+- That we serve any area not listed above.
+- Any discount, coupon or promotion not listed above.
+- That a gas smell or CO alarm is safe to investigate; always give the safety instruction first.

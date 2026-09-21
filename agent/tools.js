@@ -16,6 +16,7 @@ export const ESCALATION_REASONS = [
   "enterprise",
   "unanswered_question",
   "sensitive",
+  "emergency",
   "visitor_requested",
 ];
 
@@ -25,7 +26,7 @@ export const TOOLS = [
   {
     name: "update_lead_profile",
     description:
-      "Internal CRM notes. Record a NEW qualification fact about the visitor (need, role, company, timeline, budget range, temperature, objection). Silent: never mention it to the visitor. Do not call with nothing new.",
+      "Internal CRM notes. Record a NEW qualification fact about the visitor (need, role, company, location, timeline, budget range, temperature, objection). Silent: never mention it to the visitor. Do not call with nothing new.",
     eager_input_streaming: true,
     input_schema: {
       type: "object",
@@ -33,6 +34,7 @@ export const TOOLS = [
         need: str("The problem or goal, in the visitor's own words. Under 200 characters."),
         role: str("The visitor's role or decision authority, e.g. 'owner, sole decision-maker' or 'ops manager, reports to COO'."),
         company: str("Company name and/or type and size if shared."),
+        location: str("Where they are: city, ZIP or address, if shared. Use it to check the service area."),
         timeline: str("When they want this solved, and any trigger event."),
         budget_range: str("Budget signal, as a range or a stated ceiling."),
         temperature: str("Current lead temperature.", { enum: TEMPERATURES }),
@@ -52,8 +54,9 @@ export const TOOLS = [
       properties: {
         name: str("Visitor's name."),
         email: str("Visitor's email address, exactly as they gave it."),
-        phone: str("Phone number, only if they offered it or prefer calls."),
+        phone: str("Phone number, if they offered it, prefer calls, or the knowledge base requires it for the next step."),
         company: str("Company name, if shared."),
+        location: str("City, ZIP or address, if shared."),
         need_summary: str("One or two sentences describing what they need, in their words."),
         budget_range: str("Budget signal, if shared."),
         timeline: str("Timeline, if shared."),
@@ -81,10 +84,12 @@ export const TOOLS = [
     input_schema: {
       type: "object",
       properties: {
-        meeting_type: str("Meeting type name from the knowledge base, e.g. 'Automation Audit call'."),
+        meeting_type: str("Meeting type name exactly as listed in the knowledge base, e.g. 'Service call' or 'Free estimate'."),
         prospect_name: str("Visitor's name."),
         email: str("Visitor's email address."),
+        phone: str("Visitor's phone number, if the knowledge base requires it for booking or they offered it."),
         company: str("Company name, if shared."),
+        location: str("City, ZIP or address, if the knowledge base requires it for booking."),
         purpose: str("One line the human will read before the call: who they are and what they want."),
         preferred_times: str("Any stated preference, e.g. 'mornings next week'."),
         timezone: str("Visitor's timezone if stated, e.g. 'America/Chicago' or 'UK time'."),
@@ -96,7 +101,7 @@ export const TOOLS = [
   {
     name: "escalate_to_human",
     description:
-      "Route the conversation to a person: support issues, complaints, enterprise requirements, sensitive matters, blocking questions you cannot answer, or when the visitor asks for a human.",
+      "Route the conversation to a person: support issues, complaints, enterprise requirements, sensitive matters, emergencies that need immediate human dispatch, blocking questions you cannot answer, or when the visitor asks for a human.",
     eager_input_streaming: true,
     input_schema: {
       type: "object",

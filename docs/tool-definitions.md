@@ -13,6 +13,7 @@ Internal CRM notes. Silent. Called whenever a **new** qualification fact appears
 | `need` | string | Problem or goal, in the visitor's words (≤200 chars) |
 | `role` | string | Decision authority |
 | `company` | string | Name / type / size |
+| `location` | string | City, ZIP or address; used to check a service area |
 | `timeline` | string | When, and any trigger event |
 | `budget_range` | string | Range or ceiling |
 | `temperature` | enum | `hot` · `warm` · `cold` · `disqualified` · `unknown` |
@@ -32,7 +33,7 @@ Sends a prospect to the CRM / inbox. Only after explicit agreement in the conver
 | `need_summary` | string | ✓ | One or two sentences |
 | `temperature` | enum | ✓ | as above |
 | `consent` | boolean | ✓ | Must be `true`; the executor refuses otherwise |
-| `phone`, `company`, `budget_range`, `timeline`, `recommended_offer`, `notes` | string | | |
+| `phone`, `company`, `location`, `budget_range`, `timeline`, `recommended_offer`, `notes` | string | | `phone` when the knowledge base requires it for the next step |
 | `lead_type` | enum | | `prospect` · `existing_client` · `partner` · `other` |
 
 Result: `{ ok, lead_id, delivered_to: "local_inbox" | "crm_webhook", next_step }`.
@@ -66,17 +67,18 @@ Opens the booking flow. Only after the visitor agreed to book; never for `disqua
 | `prospect_name` | string | ✓ | |
 | `email` | string | ✓ | Validated |
 | `purpose` | string | ✓ | One line the human reads before the call |
+| `phone`, `location` | string | | Required by the prompt when the knowledge base says booking needs them |
 | `company`, `preferred_times`, `timezone` | string | | |
 
 Result: `{ ok, booking_url, meeting_type, instructions }`. `booking_url` is the configured booking link with `name` and `email` prefilled as query parameters (works with Cal.com and Calendly). The prompt forbids the model from saying the meeting is confirmed; the calendar does that.
 
 ## `escalate_to_human`
 
-Routes to a person.
+Routes to a person. For `emergency`, the prompt gives any safety instruction from the knowledge base before collecting details, and never books a calendar slot instead.
 
 | Field | Type | Required | Notes |
 |---|---|---|---|
-| `reason` | enum | ✓ | `support` · `complaint` · `enterprise` · `unanswered_question` · `sensitive` · `visitor_requested` |
+| `reason` | enum | ✓ | `support` · `complaint` · `enterprise` · `unanswered_question` · `sensitive` · `emergency` · `visitor_requested` |
 | `summary` | string | ✓ | 2–3 sentences a human can act on |
 | `urgency` | enum | ✓ | `low` · `normal` · `high` |
 | `name`, `email`, `phone` | string | | |

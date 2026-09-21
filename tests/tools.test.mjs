@@ -79,7 +79,7 @@ test("executor: local inbox path fires hooks and returns structured results", as
   assert.match(lead.lead_id, /^lead_/);
   assert.equal(seen.lead.profile_snapshot.need, "missed calls", "lead carries the profile snapshot");
 
-  const cal = await execute("trigger_calendar", { meeting_type: "Automation Audit call", prospect_name: "Sam", email: "sam@x.io", purpose: "p" });
+  const cal = await execute("trigger_calendar", { meeting_type: "Service call", prospect_name: "Sam", email: "sam@x.io", purpose: "p" });
   assert.equal(cal.ok, true);
   assert.ok(cal.booking_url.startsWith(business.bookingUrl));
   assert.ok(cal.instructions.includes("Do not say the meeting is confirmed"));

@@ -5,7 +5,7 @@ ACCRE is deliberately small: one prompt, one knowledge base, four tools, one run
 ```
    ┌──────────────────────────────────────┐     ┌──────────────────────────────────────┐
    │  agent/index.html + app.js           │     │  agent/cli.mjs  ·  your server       │
-   │  static demo page (GitHub Pages)     │     │  (Node)                              │
+   │  demo site + widget + Business view  │     │  (Node)                              │
    └───────────────┬──────────────────────┘     └───────────────┬──────────────────────┘
                    ▼                                            ▼
    ┌──────────────────────────────────────┐     ┌──────────────────────────────────────┐
@@ -78,4 +78,8 @@ The prefix is `tools → system → messages`. Tools are a constant array; the s
 
 ## Demo engine
 
-`demo-engine.js` is a keyword-and-state-machine agent. It exists so a visitor can experience the full flow on a static page without a key, and so the UI can be tested deterministically. It is not the product; the system prompt is. The engine uses the same tool executor as the live runtime, which is why the console, inbox and cards look the same whichever one is driving.
+`demo-engine.js` is a keyword-and-state-machine agent scripted for the sample business. It exists so a visitor can experience the full flow on a static page without a key, and so the UI can be tested deterministically. It is not the product; the system prompt is. The engine uses the same tool executor as the live runtime, which is why the Business view, inbox and cards look the same whichever one is driving.
+
+## The demo page
+
+`agent/index.html` is deliberately a client's website, not a product page: header, hero, services, pricing, reviews, service area, footer. The concierge is the floating widget, and any element with `data-chat-prompt="…"` opens the widget and hands that line to the agent, so "Book service", "Get pricing" and "Check my ZIP" all route through the concierge. The **Business view** drawer renders what the tools produced: contact details from whichever tool carried them, the lead profile from `update_lead_profile`, the action log, and the inbox. A thin bar at the top is the only thing on the page that admits it is a demo.

@@ -3,163 +3,349 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Client Concierge Agent</title>
-  <meta name="description" content="ACCRE — an autonomous client concierge that qualifies leads, handles objections, books calls and hands off to humans. Interactive demo." />
-  <meta name="theme-color" content="#0a0d16" />
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%237c5cf5'/%3E%3Ctext x='32' y='42' font-family='Inter,Arial' font-size='30' font-weight='800' text-anchor='middle' fill='%230a0d16'%3EN%3C/text%3E%3C/svg%3E" />
+  <title>Summit Heating, Air & Roofing — Denver HVAC & Roofing</title>
+  <meta name="description" content="Interactive demo: a fictional Denver HVAC and roofing company's website with an autonomous client concierge (ACCRE) that qualifies leads, handles objections, books visits and hands off to humans." />
+  <meta name="theme-color" content="#0b2a4a" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231663c7'/%3E%3Cpath d='M12 44 L30 18 L38 30 L44 24 L54 44 Z' fill='%23fff'/%3E%3C/svg%3E" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
-  <header class="topbar">
-    <div class="wrap">
-      <div class="brand">
-        <div class="logo">N</div>
-        <div>ACCRE <small>· Client Concierge</small></div>
+
+  <!-- ═══ Demo control bar (the only thing on the page that is not "the client's website") ═══ -->
+  <div class="demobar" id="demobar">
+    <div class="demobar-inner">
+      <div class="demobar-note">
+        <span class="demobar-dot"></span>
+        <span><b>Interactive demo.</b> Summit is a fictional company. Nothing you type is sent anywhere.</span>
       </div>
-      <nav class="topnav">
-        <a class="icon-btn" href="https://github.com/rhain-r/client-concierge" target="_blank" rel="noopener">GitHub</a>
+      <div class="demobar-controls">
+        <div class="seg" role="group" aria-label="View">
+          <button type="button" class="seg-btn active" id="view-visitor">Visitor view</button>
+          <button type="button" class="seg-btn" id="view-business">Business view</button>
+        </div>
+        <button type="button" class="demobar-link" id="open-about">About this demo</button>
+        <a class="demobar-link" href="https://github.com/rhain-r/client-concierge" target="_blank" rel="noopener">GitHub ↗</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ The client's website ═══ -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="logo" href="#top" aria-label="Summit Heating, Air & Roofing">
+        <svg viewBox="0 0 40 40" width="36" height="36" aria-hidden="true"><rect width="40" height="40" rx="10" fill="#1663c7"/><path d="M8 28 L19 11 L24 19 L28 15 L34 28 Z" fill="#fff"/><path d="M8 28 L19 11 L24 19 L21 28Z" fill="#dbe7ff"/></svg>
+        <span><b>Summit</b><small>Heating · Air · Roofing</small></span>
+      </a>
+      <nav class="site-nav">
+        <a href="#services">Services</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#club">Comfort Club</a>
+        <a href="#reviews">Reviews</a>
+        <a href="#area">Service area</a>
       </nav>
+      <div class="header-cta">
+        <a class="phone" href="tel:+13035550148"><small>24/7 emergency line</small>(303) 555-0148</a>
+        <button type="button" class="btn btn-primary" data-chat-prompt="I'd like to book a service call">Book service</button>
+      </div>
     </div>
   </header>
 
-  <main>
-    <section class="hero wrap">
-      <div class="pill"><span class="dot"></span> Interactive demo · sample business, no API key needed</div>
-      <h1>Your website has a <em class="grad">Client Concierge</em> closing leads 24/7</h1>
-      <p class="lead">
-        It answers from your own knowledge base, qualifies every visitor one question at a time,
-        handles price and competitor objections, books the call, and hands off to a human when it should.
-        Nothing invented, nothing pushy.
-      </p>
-      <a class="btn" href="#try">Talk to it ↓</a>
+  <main id="top">
+    <section class="hero">
+      <div class="container hero-grid">
+        <div class="hero-copy">
+          <div class="eyebrow"><span class="stars">★★★★★</span> 4.9 from 1,200+ reviews · Denver metro · Licensed &amp; insured</div>
+          <h1>Heating, cooling and roofing you can actually reach at 2 a.m.</h1>
+          <p class="lead">Same-day repairs most days, true 24/7 emergency dispatch, and a flat-rate quote before anyone touches a wrench. One family-owned crew for your furnace, your AC and your roof.</p>
+          <div class="hero-actions">
+            <button type="button" class="btn btn-primary btn-lg" data-chat-prompt="My AC stopped cooling and it's 95° inside">Book a service call</button>
+            <button type="button" class="btn btn-ghost btn-lg" data-chat-prompt="How much does a new furnace cost?">Get a free estimate</button>
+          </div>
+          <ul class="trust-chips">
+            <li>Same-day service</li>
+            <li>Flat-rate quotes</li>
+            <li>0% financing · 18 mo</li>
+            <li>1-year labor warranty</li>
+          </ul>
+        </div>
+        <div class="hero-visual" aria-hidden="true">
+          <div class="dispatch-card">
+            <div class="dispatch-head"><span class="live-dot"></span> Today's dispatch board</div>
+            <div class="dispatch-row"><span class="tech">MK</span><div><b>Marcus K.</b><small>AC repair · Lakewood · arriving 1:40 PM</small></div><em>On the way</em></div>
+            <div class="dispatch-row"><span class="tech">SP</span><div><b>Sofia P.</b><small>Furnace tune-up · Parker · 2:00–4:00 PM</small></div><em>Scheduled</em></div>
+            <div class="dispatch-row"><span class="tech">DR</span><div><b>Dev R.</b><small>Roof inspection · Aurora · 3:30 PM</small></div><em>Scheduled</em></div>
+            <div class="dispatch-foot">3 same-day slots left · <a href="#" data-chat-prompt="Today if possible — can someone come out?">grab one</a></div>
+          </div>
+          <div class="hero-badge"><b>96%</b><span>arrive inside the promised window</span></div>
+        </div>
+      </div>
     </section>
 
-    <section class="block">
-      <div class="wrap center">
-        <div class="eyebrow">How it works</div>
-        <h2>Five stages, one question at a time</h2>
-        <p class="lead">Nothing here is a black box. This is the playbook the agent runs, written into its system prompt.</p>
+    <section class="trustbar">
+      <div class="container trust-grid">
+        <div><b>Since 2009</b><span>Family-owned in Denver</span></div>
+        <div><b>1,200+</b><span>five-star reviews</span></div>
+        <div><b>24/7</b><span>emergency dispatch</span></div>
+        <div><b>NATE-certified</b><span>background-checked techs</span></div>
+      </div>
+    </section>
+
+    <section class="section" id="services">
+      <div class="container">
+        <div class="section-head">
+          <div class="eyebrow">Services</div>
+          <h2>Everything above the basement and under the sky</h2>
+          <p>Repairs, replacements and maintenance for heating and cooling, plus roofing. Ask Riley, our concierge, for straight answers on any of it.</p>
+        </div>
+        <div class="cards-4">
+          <article class="svc">
+            <div class="svc-icon"><svg viewBox="0 0 24 24"><path d="M12 3v3m0 12v3M3 12h3m12 0h3M5.6 5.6l2.1 2.1m8.6 8.6 2.1 2.1M5.6 18.4l2.1-2.1m8.6-8.6 2.1-2.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/><circle cx="12" cy="12" r="3.2" stroke="currentColor" stroke-width="1.8" fill="none"/></svg></div>
+            <h3>AC &amp; heating repair</h3>
+            <p>$89 diagnostic, waived when you approve the repair. Flat-rate quote before work starts. Same-day most days.</p>
+            <button type="button" class="link-btn" data-chat-prompt="My AC stopped cooling and it's 95° inside">Book a repair →</button>
+          </article>
+          <article class="svc">
+            <div class="svc-icon"><svg viewBox="0 0 24 24"><path d="M4 11 12 4l8 7v9a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" fill="none"/></svg></div>
+            <h3>New systems &amp; heat pumps</h3>
+            <p>Free in-home estimate, sized to the house. 0% financing for 18 months. Most installs done within a week.</p>
+            <button type="button" class="link-btn" data-chat-prompt="How much does a new furnace cost?">Get pricing →</button>
+          </article>
+          <article class="svc" id="club">
+            <div class="svc-icon"><svg viewBox="0 0 24 24"><path d="M12 21s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.6-7 10-7 10z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" fill="none"/></svg></div>
+            <h3>Comfort Club</h3>
+            <p>$19/month: both seasonal tune-ups, priority scheduling, 15% off repairs and no after-hours fee.</p>
+            <button type="button" class="link-btn" data-chat-prompt="Send me info on the Comfort Club">Learn more →</button>
+          </article>
+          <article class="svc">
+            <div class="svc-icon"><svg viewBox="0 0 24 24"><path d="M3 12 12 4l9 8M6 10v9h12v-9" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" fill="none"/></svg></div>
+            <h3>Roofing &amp; hail claims</h3>
+            <p>Free inspection with photos and a written report. Repairs from $350. We meet your adjuster and handle the claim paperwork.</p>
+            <button type="button" class="link-btn" data-chat-prompt="There's a water stain on the ceiling after the hail storm">Book an inspection →</button>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section alt" id="how">
+      <div class="container">
+        <div class="section-head">
+          <div class="eyebrow">How a visit works</div>
+          <h2>No surprises, start to finish</h2>
+        </div>
         <ol class="steps">
-          <li><div class="num">1</div><h3>Triage</h3><p>Buying interest, support, partner, browsing, or hostile? Each gets a different route.</p></li>
-          <li><div class="num">2</div><h3>Discover</h3><p>Finds the problem behind the question and reflects it back in the visitor's words.</p></li>
-          <li><div class="num">3</div><h3>Qualify</h3><p>Need, authority, timeline, then budget last, framed as a service rather than a gate.</p></li>
-          <li><div class="num">4</div><h3>Handle objections</h3><p>Price resistance and competitor comparisons follow set frameworks. No invented discounts.</p></li>
-          <li><div class="num">5</div><h3>Convert or hand off</h3><p>Books the call, captures the lead with consent, or escalates to a human.</p></li>
+          <li><span>1</span><b>Book in 60 seconds</b><p>Online, by phone, or right here with Riley. You get a 2-hour arrival window by text and email.</p></li>
+          <li><span>2</span><b>Tech texts 30 minutes out</b><p>Name, photo and ETA. Shoe covers on, floors covered.</p></li>
+          <li><span>3</span><b>Flat-rate quote first</b><p>Diagnosis, then a fixed price you approve before any work. No hourly clock.</p></li>
+          <li><span>4</span><b>Warranty in writing</b><p>1 year on repairs, 2 years labor on installs, 10 years workmanship on roofs.</p></li>
         </ol>
       </div>
     </section>
 
-    <section class="block" id="try">
-      <div class="wrap">
-        <div class="center">
-          <div class="eyebrow">Try it yourself</div>
-          <h2>Talk to the concierge, watch the agent work</h2>
-          <p class="lead">Left: what the visitor sees. Right: what the business sees. This demo uses a fictional company and sample data, so click around freely; nothing is sent anywhere.</p>
+    <section class="section" id="pricing">
+      <div class="container">
+        <div class="section-head">
+          <div class="eyebrow">Transparent pricing</div>
+          <h2>The numbers, before you call</h2>
+          <p>Typical Denver-metro ranges. Repairs are quoted exactly after diagnosis; replacements and roofing after a free in-home estimate.</p>
         </div>
-
-        <div class="grid">
-          <div class="chat card">
-            <div class="chat-head">
-              <div class="avatar" id="agent-avatar">N</div>
-              <div class="who"><b id="agent-name">Nova</b><span id="agent-sub">Northwind Automation</span></div>
-              <div class="status" id="status"><span class="dot"></span><span id="status-text">Online</span></div>
-            </div>
-            <div class="messages" id="messages" aria-live="polite"></div>
-            <div class="chips" id="chips"></div>
-            <form class="composer" id="composer">
-              <textarea id="input" rows="1" placeholder="Ask about services, pricing, or just say hi…" aria-label="Message"></textarea>
-              <button type="submit" class="btn" id="send">Send</button>
-              <button type="button" class="btn secondary hidden" id="stop">Stop</button>
-            </form>
-            <div class="chat-foot">
-              <label><input type="checkbox" id="show-actions" checked /> Show agent actions in chat</label>
-              <button type="button" class="linkish" id="reset">Reset conversation</button>
-            </div>
-          </div>
-
-          <aside class="console">
-            <div class="card">
-              <div class="card-head"><span>Lead temperature</span><span id="temp-label">—</span></div>
-              <div class="card-body">
-                <div class="temp" id="temp">
-                  <span class="cold">Cold</span><span class="warm">Warm</span><span class="hot">Hot</span><span class="disqualified">Not a fit</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="card">
-              <div class="card-head"><span>Qualification notes</span><span>N · A · T · B</span></div>
-              <div class="card-body">
-                <dl class="kv" id="profile">
-                  <dt>Need</dt><dd class="empty" data-k="need">not yet known</dd>
-                  <dt>Authority</dt><dd class="empty" data-k="role">not yet known</dd>
-                  <dt>Timeline</dt><dd class="empty" data-k="timeline">not yet known</dd>
-                  <dt>Budget</dt><dd class="empty" data-k="budget_range">not yet known</dd>
-                  <dt>Company</dt><dd class="empty" data-k="company">—</dd>
-                  <dt>Objection</dt><dd class="empty" data-k="objection">—</dd>
-                  <dt>Notes</dt><dd class="empty" data-k="notes">—</dd>
-                </dl>
-              </div>
-            </div>
-
-            <div class="card">
-              <div class="card-head"><span>Agent actions</span><span id="action-count">0</span></div>
-              <div class="card-body">
-                <ul class="log" id="log"></ul>
-                <p class="empty-note" id="log-empty">Tool calls appear here with their exact JSON input and result.</p>
-              </div>
-            </div>
-
-            <div class="card">
-              <div class="card-head"><span>Inbox</span><span>what the business receives</span></div>
-              <div class="card-body">
-                <ul class="inbox" id="inbox"></ul>
-                <p class="empty-note" id="inbox-empty">Captured leads, booking requests and human handoffs land here (or in your CRM via webhook).</p>
-              </div>
-            </div>
+        <div class="pricing-grid">
+          <table class="price-table">
+            <tbody>
+              <tr><th colspan="2">Visits &amp; maintenance</th></tr>
+              <tr><td>Diagnostic visit (Mon–Sat, 7–7)</td><td><b>$89</b> <small>waived with repair</small></td></tr>
+              <tr><td>Emergency visit (nights, Sundays, holidays)</td><td><b>$149</b> <small>$89 for members</small></td></tr>
+              <tr><td>Seasonal tune-up, per system</td><td><b>$129</b></td></tr>
+              <tr><td>Comfort Club membership</td><td><b>$19</b><small>/month</small></td></tr>
+              <tr><th colspan="2">Replacements (installed, free estimate)</th></tr>
+              <tr><td>Gas furnace</td><td><b>$4,500 – $9,000</b></td></tr>
+              <tr><td>Central AC</td><td><b>$6,500 – $12,500</b></td></tr>
+              <tr><td>Heat pump (heat + cool)</td><td><b>$9,000 – $16,000</b> <small>before rebates</small></td></tr>
+              <tr><th colspan="2">Roofing (free inspection)</th></tr>
+              <tr><td>Repairs</td><td><b>$350 – $1,500</b></td></tr>
+              <tr><td>Asphalt replacement, ~2,000 sq ft</td><td><b>$9,500 – $18,000</b></td></tr>
+            </tbody>
+          </table>
+          <aside class="pricing-aside">
+            <h3>Financing that doesn't hurt</h3>
+            <p>0% APR for 18 months, or fixed terms up to 120 months, with approved credit. The estimator runs the 10-minute application on the spot.</p>
+            <button type="button" class="btn btn-primary" data-chat-prompt="Do you offer financing?">Ask about financing</button>
+            <hr />
+            <h3>Not sure what you need?</h3>
+            <p>Tell Riley what the system is doing. You'll get a straight answer and a real next step, not a sales pitch.</p>
+            <button type="button" class="btn btn-ghost" data-chat-prompt="Our furnace is 20 years old and repair bills keep coming">Repair or replace?</button>
           </aside>
         </div>
       </div>
     </section>
 
-    <section class="block">
-      <div class="wrap">
-        <div class="center">
-          <div class="eyebrow">Under the hood</div>
-          <h2>Four files do the work</h2>
-          <p class="lead">Swap the business config and the knowledge base, and the same agent sells something else.</p>
+    <section class="section alt" id="reviews">
+      <div class="container">
+        <div class="section-head">
+          <div class="eyebrow">Reviews</div>
+          <h2>What Denver says</h2>
         </div>
-        <div class="hood">
-          <div class="card">
-            <h3>System prompt</h3>
-            <p><code>prompts/ACCRE_SYSTEM_PROMPT.md</code> — persona, adaptive register, triage, qualification framework, objection playbooks, guardrails, tool protocol. Placeholders filled at runtime.</p>
-          </div>
-          <div class="card">
-            <h3>Knowledge base</h3>
-            <p><code>agent/knowledge-base.md</code> — the only source of facts the agent may state. If it is not in here, the agent says it does not know and offers a human.</p>
-          </div>
-          <div class="card">
-            <h3>Tools</h3>
-            <p><code>agent/tools.js</code> — <code>update_lead_profile</code>, <code>capture_lead</code>, <code>trigger_calendar</code>, <code>escalate_to_human</code>. Validated before they run; delivered to your CRM by webhook.</p>
-          </div>
-          <div class="card">
-            <h3>Runtime</h3>
-            <p><code>agent/accre-agent.js</code> — streaming tool loop on the official Anthropic SDK with prompt caching and adaptive thinking. Runs in the terminal (<code>npm run chat</code>) or behind your own server.</p>
-          </div>
+        <div class="cards-3">
+          <blockquote class="review"><div class="stars">★★★★★</div><p>"AC died on a Sunday in July. Someone was here by 3, quoted a number, fixed it, done. The quote was the bill."</p><footer>Maria T. · Lakewood</footer></blockquote>
+          <blockquote class="review"><div class="stars">★★★★★</div><p>"They talked us out of a full replacement and did a $240 repair instead. Who does that? Customers for life."</p><footer>Devin &amp; Aisha R. · Parker</footer></blockquote>
+          <blockquote class="review"><div class="stars">★★★★★</div><p>"Hail took out half the roof. Summit met the adjuster, handled the paperwork, new roof in two days. Zero stress."</p><footer>Lawrence P. · Aurora</footer></blockquote>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="area">
+      <div class="container area-grid">
+        <div>
+          <div class="eyebrow">Service area</div>
+          <h2>Denver metro, about 35 miles out</h2>
+          <p>Denver · Aurora · Lakewood · Littleton · Englewood · Centennial · Parker · Highlands Ranch · Arvada · Westminster · Thornton · Broomfield · Golden · Wheat Ridge · Commerce City · Brighton · Castle Rock</p>
+          <button type="button" class="btn btn-ghost" data-chat-prompt="Do you come out to Parker?">Check my ZIP with Riley</button>
+        </div>
+        <div class="emergency-card">
+          <div class="eyebrow light">Emergency?</div>
+          <h3>Smell gas or hear a CO alarm?</h3>
+          <p>Leave the house, don't touch switches, and call your gas utility or 911 from outside. Then call us: the on-call dispatcher answers 24/7.</p>
+          <a class="btn btn-white" href="tel:+13035550148">Call (303) 555-0148</a>
         </div>
       </div>
     </section>
   </main>
 
-  <footer>
-    <div class="wrap">
-      Autonomous Client Concierge &amp; Revenue Engine — demo built on a fictional business with sample data; no real leads are sent anywhere.
-      <br /><a href="https://github.com/rhain-r/client-concierge" target="_blank" rel="noopener">View the source on GitHub</a>
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div>
+        <b>Summit Heating, Air &amp; Roofing</b>
+        <p>4120 Brighton Blvd, Denver, CO 80216<br />(303) 555-0148 · hello@summit-hvac.example</p>
+      </div>
+      <div>
+        <b>Hours</b>
+        <p>Office &amp; scheduling: Mon–Sat 7:00–19:00 MT<br />Emergency repairs: 24/7, including holidays</p>
+      </div>
+      <div>
+        <b>Licensed, bonded &amp; insured</b>
+        <p>Colorado · NATE-certified technicians<br />Financing through our lending partner, with approved credit</p>
+      </div>
     </div>
+    <div class="container footer-note">© 2026 Summit Heating, Air &amp; Roofing — a fictional company built for the <a href="https://github.com/rhain-r/client-concierge" target="_blank" rel="noopener">ACCRE client-concierge demo</a>.</div>
   </footer>
+
+  <!-- ═══ Concierge widget ═══ -->
+  <div class="widget" id="widget">
+    <div class="teaser hidden" id="teaser">
+      <button type="button" class="teaser-close" id="teaser-close" aria-label="Dismiss">×</button>
+      <b>Hi, I'm Riley 👋</b>
+      <span>Need a hand with heating, cooling or your roof? I can book a visit or give you straight pricing.</span>
+    </div>
+    <button type="button" class="launcher" id="launcher" aria-label="Open chat">
+      <svg class="ico-chat" viewBox="0 0 24 24" width="26" height="26"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8a2.5 2.5 0 0 1-2.5 2.5H10l-4.4 3.3A1 1 0 0 1 4 18.5z" fill="currentColor"/></svg>
+      <svg class="ico-close" viewBox="0 0 24 24" width="24" height="24"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+      <span class="badge hidden" id="unread">1</span>
+    </button>
+
+    <section class="panel hidden" id="panel" aria-label="Chat with Riley">
+      <header class="panel-head">
+        <div class="avatar" id="agent-avatar">R</div>
+        <div class="who"><b id="agent-name">Riley</b><span id="agent-sub">Summit · replies instantly</span></div>
+        <div class="status" id="status"><span class="dot"></span><span id="status-text">Online</span></div>
+        <button type="button" class="panel-min" id="panel-min" aria-label="Minimize chat">—</button>
+      </header>
+      <div class="messages" id="messages" aria-live="polite"></div>
+      <div class="chips" id="chips"></div>
+      <form class="composer" id="composer">
+        <textarea id="input" rows="1" placeholder="Type a message…" aria-label="Message"></textarea>
+        <button type="submit" class="send" id="send" aria-label="Send"><svg viewBox="0 0 24 24" width="20" height="20"><path d="M3 11.5 21 3l-8.5 18-2-7.5z" fill="currentColor"/></svg></button>
+        <button type="button" class="send stop hidden" id="stop" aria-label="Stop"><svg viewBox="0 0 24 24" width="16" height="16"><rect x="5" y="5" width="14" height="14" rx="2" fill="currentColor"/></svg></button>
+      </form>
+      <footer class="panel-foot">
+        <label><input type="checkbox" id="show-actions" checked /> show agent actions</label>
+        <button type="button" class="linkish" id="reset">Restart</button>
+        <span class="powered">Powered by ACCRE</span>
+      </footer>
+    </section>
+  </div>
+
+  <!-- ═══ Business view drawer ═══ -->
+  <aside class="drawer" id="drawer" aria-label="Business view" aria-hidden="true">
+    <header class="drawer-head">
+      <div>
+        <div class="drawer-eyebrow">Business view</div>
+        <h2>What Summit sees</h2>
+        <p>Live from the conversation on the left. In production this is your CRM, Slack and calendar.</p>
+      </div>
+      <button type="button" class="drawer-close" id="drawer-close" aria-label="Close business view">×</button>
+    </header>
+
+    <div class="drawer-body">
+      <div class="dcard">
+        <div class="dcard-head"><span>Lead</span><span class="temp-badge" id="temp-label">no signal yet</span></div>
+        <div class="dcard-body">
+          <div class="temp" id="temp">
+            <span class="cold">Cold</span><span class="warm">Warm</span><span class="hot">Hot</span><span class="disqualified">Not a fit</span>
+          </div>
+          <dl class="kv contact" id="contact">
+            <dt>Name</dt><dd class="empty" data-c="name">—</dd>
+            <dt>Phone</dt><dd class="empty" data-c="phone">—</dd>
+            <dt>Email</dt><dd class="empty" data-c="email">—</dd>
+            <dt>Location</dt><dd class="empty" data-c="location">—</dd>
+          </dl>
+        </div>
+      </div>
+
+      <div class="dcard">
+        <div class="dcard-head"><span>Qualification notes</span><span>N · A · T · B · L</span></div>
+        <div class="dcard-body">
+          <dl class="kv" id="profile">
+            <dt>Need</dt><dd class="empty" data-k="need">not yet known</dd>
+            <dt>Authority</dt><dd class="empty" data-k="role">not yet known</dd>
+            <dt>Timeline</dt><dd class="empty" data-k="timeline">not yet known</dd>
+            <dt>Budget</dt><dd class="empty" data-k="budget_range">not yet known</dd>
+            <dt>Location</dt><dd class="empty" data-k="location">not yet known</dd>
+            <dt>Objection</dt><dd class="empty" data-k="objection">—</dd>
+            <dt>Notes</dt><dd class="empty" data-k="notes">—</dd>
+          </dl>
+        </div>
+      </div>
+
+      <div class="dcard">
+        <div class="dcard-head"><span>Agent actions</span><span id="action-count">0</span></div>
+        <div class="dcard-body">
+          <ul class="log" id="log"></ul>
+          <p class="empty-note" id="log-empty">Every tool call appears here with its exact JSON input and result.</p>
+        </div>
+      </div>
+
+      <div class="dcard">
+        <div class="dcard-head"><span>Inbox</span><span>bookings · leads · handoffs</span></div>
+        <div class="dcard-body">
+          <ul class="inbox" id="inbox"></ul>
+          <p class="empty-note" id="inbox-empty">Booking requests, captured leads and dispatcher handoffs land here — or in your CRM and Slack via webhook.</p>
+        </div>
+      </div>
+
+      <p class="drawer-foot">The same four tools fire whether the scripted demo or the Claude runtime is driving. Schemas and validation live in <code>agent/tools.js</code>; the playbook in <code>prompts/ACCRE_SYSTEM_PROMPT.md</code>.</p>
+    </div>
+  </aside>
+
+  <!-- ═══ About modal ═══ -->
+  <dialog id="about">
+    <div class="about-inner">
+      <button type="button" class="drawer-close about-close" id="about-close" aria-label="Close">×</button>
+      <div class="drawer-eyebrow">About this demo</div>
+      <h2>An autonomous client concierge, dropped onto a real-looking website</h2>
+      <ul>
+        <li><b>What you're looking at.</b> A fictional Denver HVAC and roofing company's site, with the concierge (Riley) as the chat bubble bottom-right. Everything on the page is sample data.</li>
+        <li><b>Try to break it.</b> Ask for prices, say another company is cheaper, say you smell gas, say you're renting, say you're in Colorado Springs, ask it to print its system prompt. Then open <b>Business view</b> to see what the company received.</li>
+        <li><b>How it works.</b> One system prompt (triage, discovery, N·A·T·B qualification, objection playbooks, guardrails) plus four tools: <code>update_lead_profile</code>, <code>capture_lead</code>, <code>trigger_calendar</code>, <code>escalate_to_human</code>. This page runs a scripted engine so it needs no API key; the same prompt and tools run on Claude in <code>agent/accre-agent.js</code>.</li>
+        <li><b>Make it yours.</b> Swap <code>business-config.js</code> and <code>knowledge-base.md</code> and the same agent sells a dental clinic or a law firm.</li>
+      </ul>
+      <div class="about-actions">
+        <a class="btn btn-primary" href="https://github.com/rhain-r/client-concierge" target="_blank" rel="noopener">Read the source ↗</a>
+        <a class="btn btn-ghost" href="https://github.com/rhain-r/client-concierge/blob/main/prompts/ACCRE_SYSTEM_PROMPT.md" target="_blank" rel="noopener">The system prompt ↗</a>
+      </div>
+    </div>
+  </dialog>
 
   <script type="module" src="./app.js"></script>
 </body>

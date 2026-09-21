@@ -41,8 +41,8 @@ Keep the empty `.nojekyll` file at the root: it stops GitHub Pages from running 
 | Company name, agent name, CTA, booking link, support email, hours, service summary, ideal client, pricing posture | `agent/business-config.js` |
 | Everything the agent is allowed to state as fact: services, prices, process, results, FAQ, objection facts, meeting types | `agent/knowledge-base.md` |
 | Persona, tone, discovery method, objection playbooks, guardrails, tool protocol | `prompts/ACCRE_SYSTEM_PROMPT.md` (rarely needs edits) |
-| Demo-mode script (only if you keep Demo mode for your own business) | `agent/demo-engine.js` |
-| Page copy, colours, GitHub link | `agent/index.html`, `agent/styles.css` |
+| Scripted demo conversation (only if you keep the no-key demo for your own business) | `agent/demo-engine.js` |
+| The demo website itself (copy, sections, colours, CTAs that hand a prompt to the concierge via `data-chat-prompt`) | `agent/index.html`, `agent/styles.css` |
 
 Run `npm test` after editing the config or the knowledge base: the tests fail if a placeholder is left unfilled or a section goes missing.
 
@@ -75,4 +75,4 @@ Payload shapes are documented in `docs/tool-definitions.md`. If a webhook fails,
 npm test
 ```
 
-`node --test` runs 22 checks in under a second: prompt assembly, tool schema validity, input validation and business rules, webhook delivery/failure, and the full demo conversation flows. The included GitHub Actions workflow runs the same suite on every push.
+`node --test` runs 27 checks in under a second: prompt assembly, tool schema validity, input validation and business rules, webhook delivery/failure, and the full demo conversation flows. The included GitHub Actions workflow runs the same suite on every push.
